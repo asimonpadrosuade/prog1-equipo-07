@@ -10,3 +10,6 @@ Objetivos:
 Nombre: Agustin Simon Padros.
 Objetivo Personal: Aprender a colaborar en equipo usando Git y GitHub, y aportar al proyecto
 con mis conocimientos de programación creando una aplicación util y funcional.
+
+Nombre: Lucas Quiñones 
+Objetivo personal: Ser mejor programador, atravez de herramientas nuevas y hacer un muy proyecto.
