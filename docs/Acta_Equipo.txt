@@ -4,3 +4,6 @@ Agustin Simon Padros: PM + programador principal
 Lucas Quiñones: Programador + Apoya tester.
 Alan Beckford: Programador.
 Juan Soleto: Tester y programador de apoyo.
+
+Nombre:Alan
+Objetivo personal:Pulir mis conocimientos y habilidades como programador a lo largo de la cursada para poder ser dev en un futuro
