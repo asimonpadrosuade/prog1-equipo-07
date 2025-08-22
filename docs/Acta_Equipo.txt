@@ -13,3 +13,6 @@ con mis conocimientos de programación creando una aplicación util y funcional.
 
 Nombre: Lucas Quiñones 
 Objetivo personal: Ser mejor programador, atravez de herramientas nuevas y hacer un muy proyecto.
+
+Nombre: Alan
+Objetivo personal: Pulir mis conocimientos y habilidades como programador a lo largo de la cursada para poder ser dev en un futuro
