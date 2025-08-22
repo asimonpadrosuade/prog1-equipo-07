@@ -4,3 +4,9 @@ Agustin Simon Padros: PM + programador principal
 Lucas Quiñones: Programador + Apoya tester.
 Alan Beckford: Programador.
 Juan Soleto: Tester y programador de apoyo.
+
+Objetivos:
+
+Nombre: Agustin Simon Padros.
+Objetivo Personal: Aprender a colaborar en equipo usando Git y GitHub, y aportar al proyecto
+con mis conocimientos de programación creando una aplicación util y funcional.
