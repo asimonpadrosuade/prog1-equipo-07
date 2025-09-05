@@ -1,9 +1,8 @@
 Integrantes de equipo y roles:
 
-Agustin Simon Padros: PM + programador principal
-Lucas Quiñones: Programador + Apoya tester.
+Agustin Simon Padros: PM + programador.
+Lucas Quiñones: Programador de apoyo (enfocado en GUI) + Tester.
 Alan Beckford: Programador.
-Juan Soleto: Tester y programador de apoyo.
 
 Objetivos:
 
