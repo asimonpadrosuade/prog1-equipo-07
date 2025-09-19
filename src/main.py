@@ -1,4 +1,6 @@
-
+from datetime import datetime
+import customtkinter as ctk
+from PIL import Image
 
 # Funciones
 def precio_pelicula(fecha_lanzamiento):
