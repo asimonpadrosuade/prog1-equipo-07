@@ -94,7 +94,7 @@ for pid, peli in enumerate(peliculas):
         image=poster,
         compound="top",
         fg_color="transparent",
-        text_color="white",
+        text_color="white", 
         font=("Arial", 18, "bold"),
         command=lambda pid=pid: seleccionar_pelicula(pid)
     )
