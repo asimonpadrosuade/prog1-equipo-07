@@ -42,6 +42,7 @@ peliculas = [
      "fecha_lanzamiento": datetime(2025, 10, 10),
      "imagen": ""},
 
+  feature/base-catalogo-peliculas
     {"titulo": "Homo Argentum",
      "duracion": "1h 50m",
      "categoria": "Comedia",
