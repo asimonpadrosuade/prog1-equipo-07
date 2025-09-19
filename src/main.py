@@ -101,34 +101,3 @@ for pid, peli in enumerate(peliculas):
     btn.pack(side="left", padx=10, pady=10)
 
 app.mainloop()
-
-filas = 5
-columnas = 8
-butacas = [[0 for _ in range(columnas)] for _ in range(filas)]
-
-
-def mostrar_sala():
-    print("Sala:")
-    for fila in butacas:
-        for asiento in fila:
-            if asiento == 0:
-                print("O", end=" ")
-            else:
-                print("X", end=" ")
-        print()  
-    print()
-
-
-def reservar_butaca(f, c):
-    if butacas[f][c] == 0:
-        butacas[f][c] = 1
-        print(f"Butaca ({f+1}, {c+1}) reservada ")
-    else:
-        print(f"Butaca ({f+1}, {c+1}) ocupada")
-
-
-mostrar_sala()            # mostrar sala
-reservar_butaca(0, 0)     # fila 0, columna 0
-reservar_butaca(1, 4)     # fila 1, columna 4
-reservar_butaca(1, 4)     # intentar reservar una ocupada
-mostrar_sala()            
