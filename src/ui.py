@@ -5,7 +5,8 @@ from .utils import ocultar_frame, mostrar_frame
 
 imagenes = {}
 
-#Crea la imagen para el poster importandola o colocando un placeholder
+
+# Crea la imagen para el poster importandola o colocando un placeholder
 def crear_poster(path):
     try:
         poster_img = Image.open(path) if path else None
@@ -13,8 +14,10 @@ def crear_poster(path):
         poster_img = None
 
     if poster_img is None:
-        #Fallback placeholder
-        poster_img = Image.new("RGB", (poster_size[0], poster_size[1]), color=(15, 40, 60))
+        # Fallback placeholder
+        poster_img = Image.new(
+            "RGB", (poster_size[0], poster_size[1]), color=(15, 40, 60)
+        )
 
     return ctk.CTkImage(
         light_image=poster_img,
@@ -22,7 +25,21 @@ def crear_poster(path):
         size=poster_size,
     )
 
+
 def seleccion_peliculas(app, text_bold, title_bold):
+    def correr_funciones(peli):
+        ocultar_frame(contenedor_peliculas)
+        titulo_principal.configure(
+            text=f"Confirma tu seleccion de pelicula: {peli['titulo']}"
+        )
+        sinopsis(
+            contenedor_main,
+            text_bold,
+            title_bold,
+            titulo_principal,
+            contenedor_peliculas,
+        ).pack(fill="both", expand=True)
+
     contenedor_main = ctk.CTkFrame(app, fg_color="transparent")
     contenedor_main.pack(fill="both", expand=True, padx=40, pady=40)
 
@@ -35,9 +52,7 @@ def seleccion_peliculas(app, text_bold, title_bold):
     titulo_principal.pack(pady=(0, 30))
 
     contenedor_peliculas = ctk.CTkScrollableFrame(
-        contenedor_main,
-        fg_color="transparent",
-        orientation="vertical",
+        contenedor_main, fg_color="transparent", orientation="vertical"
     )
     contenedor_peliculas.pack(fill="both", expand=True)
 
@@ -47,6 +62,7 @@ def seleccion_peliculas(app, text_bold, title_bold):
     for poster_id, pelicula in enumerate(peliculas):
         image_path = pelicula.get("imagen") or ""
         poster_image = crear_poster(image_path)
+        imagenes[poster_id] = poster_image
 
         titulo = pelicula.get("titulo", "")
         duracion = pelicula.get("duracion", "")
@@ -64,7 +80,26 @@ def seleccion_peliculas(app, text_bold, title_bold):
             text_color="white",
             font=text_bold,
             width=poster_size[0],
-            command=lambda peli=pelicula: (ocultar_frame(contenedor_peliculas), titulo_principal.configure(text=f"Confirma tu seleccion de pelicula: {peli['titulo']}"))
-
+            command=lambda peli=pelicula: correr_funciones(peli),
         )
         btn_pelicula.grid(row=row_index, column=col_index, sticky="n", padx=8, pady=12)
+
+
+def sinopsis(parent, text_bold, title_bold, titulo_principal, contenedor_peliculas):
+    frame = ctk.CTkFrame(parent, fg_color="#1a1a1a", corner_radius=12)
+
+    def volver():
+        titulo_principal.configure(text="Bienvenido a PyTicket")
+        frame.destroy()
+        contenedor_peliculas.pack(fill="both", expand=True)
+        mostrar_frame(contenedor_peliculas)
+
+    btn_volver = ctk.CTkButton(
+        frame,
+        text="Volver",
+        fg_color="#141414",
+        command=volver,
+    )
+    btn_volver.pack(pady=10, padx=10, anchor="w")
+
+    return frame
