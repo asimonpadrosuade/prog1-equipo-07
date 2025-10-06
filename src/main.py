@@ -1,20 +1,17 @@
 import customtkinter as ctk
-from .ui import seleccion_peliculas
+from . import state
 from .font import load_font
-from .data import text_size, title_size
+from .ui import seleccion_peliculas
 
-def main():
-    ctk.set_appearance_mode("dark")
-    app = ctk.CTk()
-    app.geometry("1440x1440")
-    app.configure(fg_color="#001427")
-    app.title("PyTicket")
-    text_bold = load_font(app, text_size)
-    title_bold = load_font(app, title_size)
+state.app = ctk.CTk()
+state.app.configure(fg_color="#001427")
+state.app.geometry("1440x1440")
 
-    seleccion_peliculas(app, text_bold, title_bold)
+state.FONTS["text_bold"]  = load_font(state.app, size=16)
+state.FONTS["title_bold"] = load_font(state.app, size=22)
 
-    app.mainloop()
+state.container_principal = ctk.CTkFrame(state.app, fg_color="transparent")
+state.container_principal.pack(fill="both", expand=True)
 
-if __name__ == "__main__":
-    main()
+seleccion_peliculas(state.app)
+state.app.mainloop()

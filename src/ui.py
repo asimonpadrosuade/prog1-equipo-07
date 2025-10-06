@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+from .font import load_fonts
 from .data import peliculas, poster_size, max_columns
 from .utils import ocultar_frame, mostrar_frame
 
@@ -26,19 +27,10 @@ def crear_poster(path):
     )
 
 
-def seleccion_peliculas(app, text_bold, title_bold):
-    def correr_funciones(peli):
-        ocultar_frame(contenedor_peliculas)
-        titulo_principal.configure(
-            text=f"Confirma tu seleccion de pelicula: {peli['titulo']}"
-        )
-        sinopsis(
-            contenedor_main,
-            text_bold,
-            title_bold,
-            titulo_principal,
-            contenedor_peliculas,
-        ).pack(fill="both", expand=True)
+def seleccion_peliculas(app):
+    global contenedor_main
+
+    text_bold, _, title_bold = load_fonts(app)
 
     contenedor_main = ctk.CTkFrame(app, fg_color="transparent")
     contenedor_main.pack(fill="both", expand=True, padx=40, pady=40)
@@ -52,7 +44,9 @@ def seleccion_peliculas(app, text_bold, title_bold):
     titulo_principal.pack(pady=(0, 30))
 
     contenedor_peliculas = ctk.CTkScrollableFrame(
-        contenedor_main, fg_color="transparent", orientation="vertical"
+        contenedor_main,
+        fg_color="transparent",
+        orientation="vertical",
     )
     contenedor_peliculas.pack(fill="both", expand=True)
 
@@ -80,26 +74,19 @@ def seleccion_peliculas(app, text_bold, title_bold):
             text_color="white",
             font=text_bold,
             width=poster_size[0],
-            command=lambda peli=pelicula: correr_funciones(peli),
+            command=lambda peli=pelicula: (
+                ocultar_frame(contenedor_peliculas),
+                titulo_principal.configure(
+                    text=f"Confirma tu seleccion de pelicula: {peli['titulo']}"
+                ),
+            ),
         )
+
+        btn_pelicula.image = poster_image
         btn_pelicula.grid(row=row_index, column=col_index, sticky="n", padx=8, pady=12)
 
-
-def sinopsis(parent, text_bold, title_bold, titulo_principal, contenedor_peliculas):
-    frame = ctk.CTkFrame(parent, fg_color="#1a1a1a", corner_radius=12)
-
-    def volver():
-        titulo_principal.configure(text="Bienvenido a PyTicket")
-        frame.destroy()
-        contenedor_peliculas.pack(fill="both", expand=True)
-        mostrar_frame(contenedor_peliculas)
-
-    btn_volver = ctk.CTkButton(
-        frame,
-        text="Volver",
-        fg_color="#141414",
-        command=volver,
+    container_entradas = ctk.CTkFrame(app)
+    titulo_entradas = ctk.CTkLabel(
+        container_entradas, text="Selecciona tus entradas", font=title_bold
     )
-    btn_volver.pack(pady=10, padx=10, anchor="w")
-
-    return frame
+    titulo_entradas.pack(pady=20)
