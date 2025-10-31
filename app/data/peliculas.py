@@ -3,6 +3,7 @@ from datetime import datetime
 #Peliculas
 peliculas = [
     {
+        "id": 1,
         "titulo": "El Conjuro 4",
         "duracion": "2h 15m",
         "categoria": "Terror",
@@ -21,6 +22,7 @@ peliculas = [
         "poster": "/static/posters/el-conjuro-4.png",
     },
     {
+        "id": 2,
         "titulo": "Superman",
         "duracion": "2h 9m",
         "categoria": "Acción",
@@ -33,6 +35,7 @@ peliculas = [
         "poster": "/static/posters/superman.webp",
     },
     {
+        "id": 3,
         "titulo": "Tron: Ares",
         "duracion": "1h 59m",
         "categoria": "Acción",
@@ -47,6 +50,7 @@ peliculas = [
         "poster": "/static/posters/tron-ares.jpg",
     },
     {
+        "id": 4,
         "titulo": "Homo Argentum",
         "duracion": "1h 50m",
         "categoria": "Comedia",
@@ -56,6 +60,7 @@ peliculas = [
         "poster": "/static/posters/Homo-argentum.webp",
     },
     {
+        "id": 5,
         "titulo": "Mascotas al Rescate",
         "duracion": "1h 39m",
         "categoria": "Animación",
@@ -68,6 +73,7 @@ peliculas = [
         "poster": "/static/posters/mascotas-al-rescate.jpg",
     },
     {
+        "id": 6,
         "titulo": "Una Batalla tras Otra",
         "duracion": "2h 10m",
         "categoria": "Acción",
@@ -80,6 +86,7 @@ peliculas = [
         "poster": "/static/posters/placeholder.png",
     },
     {
+        "id": 7,
         "titulo": "Camina o Muere",
         "duracion": "1h 47m",
         "categoria": "Drama",

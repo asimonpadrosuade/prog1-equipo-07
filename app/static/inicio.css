@@ -33,7 +33,7 @@ header {
   border: none;
   color: var(--quaternaryColor);
 }
-.btn-pelicula {
+.btn-pelicula, .btn-duracion, .btn-categoria {
   background-color: var(--primaryColor);
   color: var(--fgColor);
   border: none;
