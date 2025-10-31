@@ -83,7 +83,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("18:00", "22:15")},
         },
         "fecha_lanzamiento": datetime(2025, 9, 20),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/Una_batalla_tras_otra.jpg",
     },
     {
         "id": 7,
@@ -96,7 +96,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("16:15", "21:45")},
         },
         "fecha_lanzamiento": datetime(2025, 10, 2),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/camina_o_muere.jpg,
     },
     {
         "titulo": "Jurassic World Renace",
@@ -107,7 +107,7 @@ peliculas = [
             "15/11/2025": {"Castellano": ("13:30", "18:00", "22:30")},
         },
         "fecha_lanzamiento": datetime(2025, 8, 30),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/jurassic_world_rebirth.jpg",
     },
     {
         "titulo": "Lilo y Stich",
@@ -119,7 +119,7 @@ peliculas = [
             "Subtitulado": ("20:30",),
         },
         "fecha_lanzamiento": datetime(2025, 7, 25),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/lilo_and_stitch.jpg",
     },
     {
         "titulo": "Avatar: el Camino del Agua",
@@ -133,7 +133,7 @@ peliculas = [
             }
         },
         "fecha_lanzamiento": datetime(2025, 9, 10),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/avatar_the_way_of_water",
     },
     {
         "titulo": "F1 la Película",
@@ -145,7 +145,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("14:00", "20:00")},
         },
         "fecha_lanzamiento": datetime(2025, 10, 1),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/f1.jpg",
     },
     {
         "titulo": "Misión Imposible: Sentencia Final",
@@ -157,7 +157,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("18:30", "22:45")},
         },
         "fecha_lanzamiento": datetime(2025, 8, 5),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/mission_impossible_the_final_reckoning",
     },
     {
         "titulo": "Los 4 Fantásticos: Primeros Pasos",
@@ -169,6 +169,6 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("17:00", "21:30")},
         },
         "fecha_lanzamiento": datetime(2025, 9, 15),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/fantastic_four.jpg",
     },
 ]
