@@ -77,7 +77,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("18:00", "22:15")},
         },
         "fecha_lanzamiento": datetime(2025, 9, 20),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/Una_batalla_tras_otra.jpg",
     },
     {
         "titulo": "Camina o Muere",
