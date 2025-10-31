@@ -33,29 +33,54 @@
               value="{{ busqueda or '' }}"
               autocomplete="off"
             />
-            <button type="submit" class="btn btn-pelicula rounded-3">Buscar</button>
+            <button type="submit" class="btn btn-pelicula rounded-3">
+              Buscar
+            </button>
+            <select name="categoria" class="form-select w-auto rounded-3 btn-categoria">
+              <option value="">Categoría</option>
+              <option value="accion" {% if categoria == "accion" %}selected{% endif %}>Acción</option>
+              <option value="comedia" {% if categoria == "comedia" %}selected{% endif %}>Comedia</option>
+              <option value="drama" {% if categoria == "drama" %}selected{% endif %}>Drama</option>
+              <option value="terror" {% if categoria == "terror" %}selected{% endif %}>Terror</option>
+            </select>
+            <select name="duracion" class="form-select w-auto rounded-3 btn-duracion">
+              <option value="">Duración</option>
+              <option value="corta" {% if duracion == "corta" %}selected{% endif %}>Corta (-90 min)</option>
+              <option value="media" {% if duracion == "media" %}selected{% endif %}>Media (90-120 min)</option>
+              <option value="larga" {% if duracion == "larga" %}selected{% endif %}>Larga (+120 min)</option>
+            </select>
           </form>
         </div>
         <div class="peliculas_container mt-4">
           {% if peliculas %}
-            <div class="row">
-              {% for pelicula in peliculas %}
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
-                  <div class="card bg-dark h-100 border-0 rounded-4">
-                    <img src="{{ pelicula.poster }}" class="card-img-top rounded-top-4" alt="{{ pelicula.titulo }}">
-                    <div class="card-body">
-                      <h5 class="card-title text-light">{{ pelicula.titulo }}</h5>
-                      <p class="card-text text-light small">{{ pelicula.duracion }} • {{ pelicula.categoria }}</p>
-                    </div>
+          <div class="row">
+            {% for pelicula in peliculas %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
+              <a
+                href="/pelicula/{{ pelicula.titulo | lower | replace(' ', '-') }}-{{ pelicula.id }}"
+                class="text-decoration-none"
+              >
+                <div class="card bg-dark h-100 border-0 rounded-4">
+                  <img
+                    src="{{ pelicula.poster }}"
+                    class="card-img-top rounded-top-4"
+                    alt="{{ pelicula.titulo }}"
+                  />
+                  <div class="card-body">
+                    <h5 class="card-title text-light">{{ pelicula.titulo }}</h5>
+                    <p class="card-text text-light small">
+                      {{ pelicula.duracion }} • {{ pelicula.categoria }}
+                    </p>
                   </div>
                 </div>
-              {% endfor %}
+              </a>
             </div>
+            {% endfor %}
+          </div>
           {% else %}
-            <p class="text-secondary">No se encontraron películas.</p>
+          <p class="text-secondary">No se encontraron películas.</p>
           {% endif %}
         </div>
-
       </section>
     </main>
     <footer></footer>

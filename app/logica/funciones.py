@@ -1,4 +1,30 @@
 from datetime import datetime
+from app.data.peliculas import peliculas
+
+#Seleccion de peliculas
+def buscar_peliculas(busqueda: str | None, categoria: str | None = None, duracion: str | None = None):
+    resultados = peliculas
+
+    if busqueda:
+        resultados = [pelicula for pelicula in resultados if busqueda.lower() in pelicula['titulo'].lower()]
+
+    if categoria:
+        resultados = [pelicula for pelicula in resultados if pelicula['categoria'].lower() == categoria.lower()]
+
+    if duracion:
+        def duracion_en_minutos(d: str) -> int:
+            horas, minutos = d.split('h ')
+            minutos = minutos.replace('m', '')
+            return int(horas) * 60 + int(minutos)
+
+        if duracion == "corta":
+            resultados = [pelicula for pelicula in resultados if duracion_en_minutos(pelicula['duracion']) < 90]
+        elif duracion == "media":
+            resultados = [pelicula for pelicula in resultados if 90 <= duracion_en_minutos(pelicula['duracion']) <= 120]
+        elif duracion == "larga":
+            resultados = [pelicula for pelicula in resultados if duracion_en_minutos(pelicula['duracion']) > 120]
+
+    return resultados
 
 #Precios
 def precio_por_estreno(fecha_lanzamiento):
