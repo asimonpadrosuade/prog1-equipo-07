@@ -89,7 +89,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("16:15", "21:45")},
         },
         "fecha_lanzamiento": datetime(2025, 10, 2),
-        "poster": "/static/posters/placeholder.png",
+        "poster": "/static/posters/camina,
     },
     {
         "titulo": "Jurassic World Renace",
