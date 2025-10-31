@@ -1,0 +1,11 @@
+:root {
+  --fgColor: #FFFFFF;
+  --primaryColor: #000000;
+  --secondaryColor: #121212;
+  --tertiaryColor: #595959;
+  --quaternaryColor: #d4d4d4;
+  --primaryFont: "Montserrat", sans-serif;
+}
+.bg-dark {
+  background-color: var(--primaryColor) !important;
+}

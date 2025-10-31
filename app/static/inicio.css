@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: var(--primaryColor);
+  font-family: var(--primaryFont);
+  padding: 0 8rem;
+}
+header {
+  padding: 3.2rem 2rem;
+}
+.title {
+  color: var(--fgColor);
+  font-weight: 600;
+}
+.main-container {
+  padding: 2rem 4rem;
+}
+
+/*Barra de busqueda*/
+.form-control {
+  background-color: var(--primaryColor);
+  color: var(--quaternaryColor);
+  border: none;
+  padding: 0.6em 1.2em;
+}
+.form-control::placeholder {
+  color: var(--tertiaryColor);
+}
+.form-control:focus {
+  background-color: var(--primaryColor);
+  border: none;
+  color: var(--quaternaryColor);
+}
+.btn-pelicula {
+  background-color: var(--primaryColor);
+  color: var(--fgColor);
+  border: none;
+}
