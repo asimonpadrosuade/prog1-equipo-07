@@ -1,17 +1,5 @@
 from datetime import datetime
 
-#UI helpers
-def mostrar_frame(frame):
-    frame.pack(fill="both", expand=True)
-
-def ocultar_frame(frame):
-    frame.pack_forget()
-
-def swap_frames(container, frame_nuevo):
-    for child in container.winfo_children():
-        child.pack_forget()
-    frame_nuevo.pack(fill="both", expand=True)
-
 #Precios
 def precio_por_estreno(fecha_lanzamiento):
     precio_estandar = 7999
@@ -52,3 +40,7 @@ def reservar_butaca(butacas, f, c):
         print(f"Butaca ({f + 1}, {c + 1}) reservada ")
     else:
         print(f"Butaca ({f + 1}, {c + 1}) ocupada")
+
+filas = 5
+columnas = 8
+butacas = [[0 for _ in range(columnas)] for _ in range(filas)]

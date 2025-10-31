@@ -18,7 +18,7 @@ peliculas = [
             },
         },
         "fecha_lanzamiento": datetime(2025, 9, 5),
-        "imagen": "assets/posters/el-conjuro-4.png",
+        "poster": "/static/posters/el-conjuro-4.png",
     },
     {
         "titulo": "Superman",
@@ -30,7 +30,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("13:15", "16:00", "20:10")},
         },
         "fecha_lanzamiento": datetime(2025, 7, 10),
-        "imagen": "",
+        "poster": "/static/posters/superman.webp",
     },
     {
         "titulo": "Tron: Ares",
@@ -44,7 +44,7 @@ peliculas = [
             }
         },
         "fecha_lanzamiento": datetime(2025, 10, 10),
-        "imagen": "",
+        "poster": "/static/posters/tron-ares.jpg",
     },
     {
         "titulo": "Homo Argentum",
@@ -53,7 +53,7 @@ peliculas = [
         "Sinopsis":"Una antológica comedia argentina compuesta por 16 historias independientes, todas protagonizadas por Guillermo Francella en distintos roles. Cada relato aborda con humor, ironía y mirada crítica la cultura, las costumbres y las tensiones sociales del “ser argentino”, ofreciendo un espejo de identidad nacional que provoca risas... y reflexión.",
         "horarios": {"Castellano": ("13:50", "18:40", "20:10")},
         "fecha_lanzamiento": datetime(2025, 8, 14),
-        "imagen": "",
+        "poster": "/static/posters/Homo-argentum.webp",
     },
     {
         "titulo": "Mascotas al Rescate",
@@ -65,7 +65,7 @@ peliculas = [
             "Subtitulado": ("12:30", "16:45"),
         },
         "fecha_lanzamiento": datetime(2025, 8, 25),
-        "imagen": "",
+        "poster": "/static/posters/mascotas-al-rescate.jpg",
     },
     {
         "titulo": "Una Batalla tras Otra",
@@ -77,7 +77,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("18:00", "22:15")},
         },
         "fecha_lanzamiento": datetime(2025, 9, 20),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "Camina o Muere",
@@ -89,7 +89,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("16:15", "21:45")},
         },
         "fecha_lanzamiento": datetime(2025, 10, 2),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "Jurassic World Renace",
@@ -100,7 +100,7 @@ peliculas = [
             "15/11/2025": {"Castellano": ("13:30", "18:00", "22:30")},
         },
         "fecha_lanzamiento": datetime(2025, 8, 30),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "Lilo y Stich",
@@ -112,7 +112,7 @@ peliculas = [
             "Subtitulado": ("20:30",),
         },
         "fecha_lanzamiento": datetime(2025, 7, 25),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "Avatar: el Camino del Agua",
@@ -126,7 +126,7 @@ peliculas = [
             }
         },
         "fecha_lanzamiento": datetime(2025, 9, 10),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "F1 la Película",
@@ -138,7 +138,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("14:00", "20:00")},
         },
         "fecha_lanzamiento": datetime(2025, 10, 1),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "Misión Imposible: Sentencia Final",
@@ -150,7 +150,7 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("18:30", "22:45")},
         },
         "fecha_lanzamiento": datetime(2025, 8, 5),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
     {
         "titulo": "Los 4 Fantásticos: Primeros Pasos",
@@ -162,21 +162,6 @@ peliculas = [
             "16/11/2025": {"Subtitulado": ("17:00", "21:30")},
         },
         "fecha_lanzamiento": datetime(2025, 9, 15),
-        "imagen": "",
+        "poster": "/static/posters/placeholder.png",
     },
 ]
-
-#Butacas
-filas = 5
-columnas = 8
-butacas = [[0 for _ in range(columnas)] for _ in range(filas)]
-
-#Layout
-max_columns = 5
-poster_unit = 120
-poster_size = (2 * poster_unit, 3 * poster_unit)
-
-#Tipografia
-text_size = 18
-title_size = 32
-font_family = "Montserrat"
