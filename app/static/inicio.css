@@ -1,27 +1,7 @@
-* {
-  margin: 0;
-  box-sizing: border-box;
-}
-body {
-  background-color: var(--primaryColor);
-  font-family: var(--primaryFont);
-  padding: 0 8rem;
-}
-header {
-  padding: 3.2rem 2rem;
-}
-.title {
-  color: var(--fgColor);
-  font-weight: 600;
-}
-.main-container {
-  padding: 2rem 4rem;
-}
-
 /*Barra de busqueda*/
 .form-control {
-  background-color: var(--primaryColor);
-  color: var(--quaternaryColor);
+  background-color: var(--fgColor);
+  color: var(--primaryColor);
   border: none;
   padding: 0.6em 1.2em;
 }
@@ -29,12 +9,26 @@ header {
   color: var(--tertiaryColor);
 }
 .form-control:focus {
-  background-color: var(--primaryColor);
+  background-color: var(--fgColor);
   border: none;
-  color: var(--quaternaryColor);
+  color: var(--primaryColor);
 }
 .btn-pelicula, .btn-duracion, .btn-categoria {
   background-color: var(--primaryColor);
+  border: 1px var(--fgColor) solid;
   color: var(--fgColor);
-  border: none;
+}
+.btn-pelicula:hover, .btn-categoria:hover, .btn-duracion:hover {
+  background-color: var(--primaryColor);
+  border: 1px var(--fgColor) solid;
+  color: var(--fgColor);
+}
+.btn-pelicula:hover {
+   scale: 1.03;
+}
+.card-text {
+  font-weight: 500;
+}
+.card-title {
+  font-weight: 600;
 }
