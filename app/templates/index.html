@@ -17,51 +17,55 @@
     <link rel="stylesheet" href="/static/all.css" />
     <link rel="stylesheet" href="/static/inicio.css" />
   </head>
-  <body>
+  <body class="mx-lg-5 mx-md-2 mx-sm-0">
     <header>
       <h1 class="title">PyTicket</h1>
     </header>
     <main>
-      <section class="main-container rounded-4">
+      <section class="main-container px-sm-5 px-3 rounded-4">
         <div class="buscar_peliculas">
-          <form method="get" action="/" class="d-flex gap-3">
-            <input
-              type="text"
-              name="q"
-              class="form-control rounded-3"
-              placeholder="Selecciona la pelicula..."
-              value="{{ busqueda or '' }}"
-              autocomplete="off"
-            />
-            <button type="submit" class="btn btn-pelicula rounded-3">
-              Buscar
-            </button>
-            <select name="categoria" class="form-select w-auto rounded-3 btn-categoria">
-              <option value="">Categoría</option>
-              <option value="accion" {% if categoria == "accion" %}selected{% endif %}>Acción</option>
-              <option value="comedia" {% if categoria == "comedia" %}selected{% endif %}>Comedia</option>
-               <option value="animacion" {% if categoria == "animacion" %}selected{% endif %}>Animación</option>
-               <option value="familia" {% if categoria == "familia" %}selected{% endif %}>Familia</option>
-              <option value="ciencia ficcion" {% if categoria == "ciencia ficcion" %}selected{% endif %}>Ciencia Ficción</option>
-              <option value="superheroes" {% if categoria == "superheroes" %}selected{% endif %}>Superhéroes</option>
-              <option value="terror" {% if categoria == "terror" %}selected{% endif %}>Terror</option>
-              <option value="aventura" {% if categoria == "aventura" %}selected{% endif %}>Aventura</option>
-              <option value="deportes" {% if categoria == "deportes" %}selected{% endif %}>Deportes</option>
-              <option value="suspenso" {% if categoria == "suspenso" %}selected{% endif %}>Suspenso</option>
-            </select>
-            <select name="duracion" class="form-select w-auto rounded-3 btn-duracion">
-              <option value="">Duración</option>
-              <option value="corta" {% if duracion == "corta" %}selected{% endif %}>Corta (-100 min)</option>
-              <option value="media" {% if duracion == "media" %}selected{% endif %}>Media (100-150 min)</option>
-              <option value="larga" {% if duracion == "larga" %}selected{% endif %}>Larga (+150 min)</option>
-            </select>
+          <form method="get" action="/" class="d-flex flex-column flex-xl-row col-xl-12 gap-3">
+            <div class="d-flex flex-column flex-sm-row flex-grow-1 gap-3">
+              <input
+                type="text"
+                name="q"
+                class="form-control rounded-3"
+                placeholder="Selecciona la pelicula..."
+                value="{{ busqueda or '' }}"
+                autocomplete="off"
+              />
+              <button type="submit" class="btn btn-pelicula rounded-3">
+                Buscar
+              </button>
+            </div>
+            <div class="d-flex gap-3">  
+              <select name="categoria" class="form-select rounded-3 btn-categoria">
+                <option value="">Categoría</option>
+                <option value="accion" {% if categoria == "accion" %}selected{% endif %}>Acción</option>
+                <option value="comedia" {% if categoria == "comedia" %}selected{% endif %}>Comedia</option>
+                 <option value="animacion" {% if categoria == "animacion" %}selected{% endif %}>Animación</option>
+                 <option value="familia" {% if categoria == "familia" %}selected{% endif %}>Familia</option>
+                <option value="ciencia ficcion" {% if categoria == "ciencia ficcion" %}selected{% endif %}>Ciencia Ficción</option>
+                <option value="superheroes" {% if categoria == "superheroes" %}selected{% endif %}>Superhéroes</option>
+                <option value="terror" {% if categoria == "terror" %}selected{% endif %}>Terror</option>
+                <option value="aventura" {% if categoria == "aventura" %}selected{% endif %}>Aventura</option>
+                <option value="deportes" {% if categoria == "deportes" %}selected{% endif %}>Deportes</option>
+                <option value="suspenso" {% if categoria == "suspenso" %}selected{% endif %}>Suspenso</option>
+              </select>
+              <select name="duracion" class="form-select rounded-3 btn-duracion">
+                <option value="">Duración</option>
+                <option value="corta" {% if duracion == "corta" %}selected{% endif %}>Corta (-100 min)</option>
+                <option value="media" {% if duracion == "media" %}selected{% endif %}>Media (100-150 min)</option>
+                <option value="larga" {% if duracion == "larga" %}selected{% endif %}>Larga (+150 min)</option>
+              </select>
+            </div>
           </form>
         </div>
         <div class="peliculas_container mt-4">
           {% if peliculas %}
           <div class="row">
             {% for pelicula in peliculas %}
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 my-3">
               <a
                 href="/pelicula/{{ pelicula.id }}"
                 class="text-decoration-none"

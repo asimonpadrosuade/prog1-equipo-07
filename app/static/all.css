@@ -5,17 +5,17 @@
 body {
   background-color: var(--primaryColor);
   font-family: var(--primaryFont);
-  padding: 0 8rem;
+  padding: 0 40px;
 }
 header {
   padding: 3.2rem 2rem;
 }
 :root {
-  --fgColor: #FFFFFF;
-  --primaryColor: #000000;
-  --secondaryColor: #121212;
+  --fgColor: #EFE6DD;
+  --primaryColor: #151313;
+  --secondaryColor: #6B818C;
   --tertiaryColor: #595959;
-  --quaternaryColor: #d4d4d4;
+  --quaternaryColor: #201D1D;
   --primaryFont: "Montserrat", sans-serif;
 }
 
@@ -24,5 +24,8 @@ header {
   font-weight: 600;
 }
 .bg-dark {
-  background-color: var(--primaryColor) !important;
+  background-color: var(--quaternaryColor) !important;
+}
+.text-light {
+  color: var(--fgColor);
 }
