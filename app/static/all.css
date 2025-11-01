@@ -1,3 +1,15 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: var(--primaryColor);
+  font-family: var(--primaryFont);
+  padding: 0 8rem;
+}
+header {
+  padding: 3.2rem 2rem;
+}
 :root {
   --fgColor: #FFFFFF;
   --primaryColor: #000000;
@@ -5,6 +17,11 @@
   --tertiaryColor: #595959;
   --quaternaryColor: #d4d4d4;
   --primaryFont: "Montserrat", sans-serif;
+}
+
+.title {
+  color: var(--fgColor);
+  font-weight: 600;
 }
 .bg-dark {
   background-color: var(--primaryColor) !important;

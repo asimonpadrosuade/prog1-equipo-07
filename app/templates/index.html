@@ -33,11 +33,37 @@
               value="{{ busqueda or '' }}"
               autocomplete="off"
             />
+<<<<<<< Updated upstream
             <button type="submit" class="btn btn-pelicula rounded-3">Buscar</button>
+=======
+            <button type="submit" class="btn btn-pelicula rounded-3">
+              Buscar
+            </button>
+            <select name="categoria" class="form-select w-auto rounded-3 btn-categoria">
+              <option value="">Categoría</option>
+              <option value="accion" {% if categoria == "accion" %}selected{% endif %}>Acción</option>
+              <option value="comedia" {% if categoria == "comedia" %}selected{% endif %}>Comedia</option>
+               <option value="animacion" {% if categoria == "animacion" %}selected{% endif %}>Animación</option>
+               <option value="familia" {% if categoria == "familia" %}selected{% endif %}>Familia</option>
+              <option value="ciencia ficcion" {% if categoria == "ciencia ficcion" %}selected{% endif %}>Ciencia Ficción</option>
+              <option value="superheroes" {% if categoria == "superheroes" %}selected{% endif %}>Superhéroes</option>
+              <option value="terror" {% if categoria == "terror" %}selected{% endif %}>Terror</option>
+              <option value="aventura" {% if categoria == "aventura" %}selected{% endif %}>Aventura</option>
+              <option value="deportes" {% if categoria == "deportes" %}selected{% endif %}>Deportes</option>
+              <option value="suspenso" {% if categoria == "suspenso" %}selected{% endif %}>Suspenso</option>
+            </select>
+            <select name="duracion" class="form-select w-auto rounded-3 btn-duracion">
+              <option value="">Duración</option>
+              <option value="corta" {% if duracion == "corta" %}selected{% endif %}>Corta (-100 min)</option>
+              <option value="media" {% if duracion == "media" %}selected{% endif %}>Media (100-150 min)</option>
+              <option value="larga" {% if duracion == "larga" %}selected{% endif %}>Larga (+150 min)</option>
+            </select>
+>>>>>>> Stashed changes
           </form>
         </div>
         <div class="peliculas_container mt-4">
           {% if peliculas %}
+<<<<<<< Updated upstream
             <div class="row">
               {% for pelicula in peliculas %}
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
@@ -47,6 +73,31 @@
                       <h5 class="card-title text-light">{{ pelicula.titulo }}</h5>
                       <p class="card-text text-light small">{{ pelicula.duracion }} • {{ pelicula.categoria }}</p>
                     </div>
+=======
+          <div class="row">
+            {% for pelicula in peliculas %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
+              <a
+                href="/pelicula/{{ pelicula.id }}"
+                class="text-decoration-none"
+              >
+                <div class="card bg-dark h-100 border-0 rounded-4">
+                  <img
+                    src="{{ pelicula.poster }}"
+                    class="card-img-top rounded-top-4"
+                    alt="{{ pelicula.titulo }}"
+                  />
+                  <div class="card-body">
+                    <h5 class="card-title text-light">{{ pelicula.titulo }}</h5>
+                    <p class="card-text text-light small">
+                      {{ pelicula.duracion }} • 
+                      {% if pelicula.categoria is string %}
+                        {{ pelicula.categoria }}
+                      {% else %}
+                        {% for cat in pelicula.categoria %}{{ cat }}{% if not loop.last %} & {% endif %} {% endfor %}
+                      {% endif %}
+                    </p>
+>>>>>>> Stashed changes
                   </div>
                 </div>
               {% endfor %}
