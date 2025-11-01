@@ -33,9 +33,6 @@
               value="{{ busqueda or '' }}"
               autocomplete="off"
             />
-<<<<<<< Updated upstream
-            <button type="submit" class="btn btn-pelicula rounded-3">Buscar</button>
-=======
             <button type="submit" class="btn btn-pelicula rounded-3">
               Buscar
             </button>
@@ -58,22 +55,10 @@
               <option value="media" {% if duracion == "media" %}selected{% endif %}>Media (100-150 min)</option>
               <option value="larga" {% if duracion == "larga" %}selected{% endif %}>Larga (+150 min)</option>
             </select>
->>>>>>> Stashed changes
           </form>
         </div>
         <div class="peliculas_container mt-4">
           {% if peliculas %}
-<<<<<<< Updated upstream
-            <div class="row">
-              {% for pelicula in peliculas %}
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
-                  <div class="card bg-dark h-100 border-0 rounded-4">
-                    <img src="{{ pelicula.poster }}" class="card-img-top rounded-top-4" alt="{{ pelicula.titulo }}">
-                    <div class="card-body">
-                      <h5 class="card-title text-light">{{ pelicula.titulo }}</h5>
-                      <p class="card-text text-light small">{{ pelicula.duracion }} • {{ pelicula.categoria }}</p>
-                    </div>
-=======
           <div class="row">
             {% for pelicula in peliculas %}
             <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-3">
@@ -97,11 +82,12 @@
                         {% for cat in pelicula.categoria %}{{ cat }}{% if not loop.last %} & {% endif %} {% endfor %}
                       {% endif %}
                     </p>
->>>>>>> Stashed changes
                   </div>
                 </div>
-              {% endfor %}
+              </a>
             </div>
+            {% endfor %}
+          </div>
           {% else %}
             <p class="text-secondary">No se encontraron películas.</p>
           {% endif %}
