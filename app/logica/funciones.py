@@ -1,35 +1,7 @@
-from datetime import datetime
-<<<<<<< HEAD
-from app.data.peliculas import peliculas
-
-#Seleccion de peliculas
-def buscar_peliculas(busqueda: str | None, categoria: str | None = None, duracion: str | None = None):
-    resultados = peliculas
-
-    if busqueda:
-        resultados = [pelicula for pelicula in resultados if busqueda.lower() in pelicula['titulo'].lower()]
-
-    if categoria:
-        resultados = [pelicula for pelicula in resultados if pelicula['categoria'].lower() == categoria.lower()]
-
-    if duracion:
-        def duracion_en_minutos(d: str) -> int:
-            horas, minutos = d.split('h ')
-            minutos = minutos.replace('m', '')
-            return int(horas) * 60 + int(minutos)
-
-        if duracion == "corta":
-            resultados = [pelicula for pelicula in resultados if duracion_en_minutos(pelicula['duracion']) < 90]
-        elif duracion == "media":
-            resultados = [pelicula for pelicula in resultados if 90 <= duracion_en_minutos(pelicula['duracion']) <= 120]
-        elif duracion == "larga":
-            resultados = [pelicula for pelicula in resultados if duracion_en_minutos(pelicula['duracion']) > 120]
-
-    return resultados
-=======
+import string
 import unicodedata
+from datetime import datetime
 from app.data.peliculas import peliculas
->>>>>>> hotfix
 
 # Mostrar peliculas
 def encontrar_peliculas(id: int):
@@ -38,7 +10,7 @@ def encontrar_peliculas(id: int):
             return pelicula
     return None
 
-# Seleccion de peliculas
+# Filtros de peliculas
 def buscar_peliculas(
     busqueda: str | None, categoria: str | None = None, duracion: str | None = None
 ):
@@ -48,7 +20,7 @@ def buscar_peliculas(
         resultados = [
             pelicula
             for pelicula in resultados
-            if busqueda.lower() in pelicula["titulo"].lower()
+            if busqueda.lower() in quitar_tildes(quitar_punt(pelicula["titulo"].lower()))
         ]
 
     if categoria:
@@ -87,13 +59,17 @@ def buscar_peliculas(
 
     return resultados
 
-
+# Normalizar texto quitando tildes
 def quitar_tildes(texto: str) -> str:
     texto_normalizado = unicodedata.normalize("NFD", texto)
     texto_sin_tildes = "".join(
         c for c in texto_normalizado if unicodedata.category(c) != "Mn"
     )
     return texto_sin_tildes
+
+# Normalizar texto quitando signo de puntuación y demas
+def quitar_punt(texto: str) -> str:
+    return texto.translate(str.maketrans('', '', string.punctuation))
 
 
 # Precios
