@@ -1,147 +1,69 @@
-from datetime import datetime
-<<<<<<< HEAD
+from datetime import datetime, timedelta
 from app.data.peliculas import peliculas
 
-#Seleccion de peliculas
-def buscar_peliculas(busqueda: str | None, categoria: str | None = None, duracion: str | None = None):
-    resultados = peliculas
+#Precios
+PRECIOS={"comun":15000,"menor_jubilado":10000,"movistar":12000}
 
-    if busqueda:
-        resultados = [pelicula for pelicula in resultados if busqueda.lower() in pelicula['titulo'].lower()]
-
-    if categoria:
-        resultados = [pelicula for pelicula in resultados if pelicula['categoria'].lower() == categoria.lower()]
-
-    if duracion:
-        def duracion_en_minutos(d: str) -> int:
-            horas, minutos = d.split('h ')
-            minutos = minutos.replace('m', '')
-            return int(horas) * 60 + int(minutos)
-
-        if duracion == "corta":
-            resultados = [pelicula for pelicula in resultados if duracion_en_minutos(pelicula['duracion']) < 90]
-        elif duracion == "media":
-            resultados = [pelicula for pelicula in resultados if 90 <= duracion_en_minutos(pelicula['duracion']) <= 120]
-        elif duracion == "larga":
-            resultados = [pelicula for pelicula in resultados if duracion_en_minutos(pelicula['duracion']) > 120]
-
-    return resultados
-=======
-import unicodedata
-from app.data.peliculas import peliculas
->>>>>>> hotfix
-
-# Mostrar peliculas
-def encontrar_peliculas(id: int):
-    for pelicula in peliculas:
-        if pelicula["id"] == id:
-            return pelicula
+def get_pelicula(peliculas,pid):
+    for p in peliculas:
+        if p["id"]==pid:return p
     return None
 
-# Seleccion de peliculas
-def buscar_peliculas(
-    busqueda: str | None, categoria: str | None = None, duracion: str | None = None
-):
-    resultados = peliculas
+def infer_formatos(p):
+    return p.get("formatos",["2D"])
 
-    if busqueda:
-        resultados = [
-            pelicula
-            for pelicula in resultados
-            if busqueda.lower() in pelicula["titulo"].lower()
-        ]
+def fechas_disponibles(p):
+    if "fechas"in p and isinstance(p["fechas"],dict):
+        try:return sorted(p["fechas"].keys(),key=lambda d:datetime.strptime(d,"%d/%m/%Y"))
+        except:return list(p["fechas"].keys())
+    if "horarios"in p:
+        hoy=datetime.today()
+        return [(hoy+timedelta(days=i)).strftime("%d/%m/%Y") for i in range(3)]
+    return [None]
 
+def idiomas_para(p,fecha):
+    if fecha and "fechas"in p:return list(p["fechas"][fecha].keys())
+    if "horarios"in p:return list(p["horarios"].keys())
+    return []
+
+def horarios_para(p,fecha,idioma):
+    if fecha and "fechas"in p:return list(p["fechas"][fecha].get(idioma,()))
+    if "horarios"in p:return list(p["horarios"].get(idioma,()))
+    return []
+
+def encontrar_peliculas(pid:int):
+    return get_pelicula(peliculas,pid)
+
+def buscar_peliculas(q=None,categoria=None,duracion=None):
+    res=peliculas
+    if q:
+        ql=q.lower()
+        res=[p for p in res if ql in p["titulo"].lower()]
     if categoria:
-        categoria_filtrada = quitar_tildes(categoria.lower())
-        resultados = [
-            pelicula
-            for pelicula in resultados
-            if categoria_filtrada in quitar_tildes(str(pelicula["categoria"]).lower())
-        ]
+        def match_cat(p):
+            c=p.get("categoria")
+            if isinstance(c,set):return categoria in c or categoria.lower() in {x.lower() for x in c}
+            if isinstance(c,str):return categoria.lower() in c.lower()
+            return False
+        res=[p for p in res if match_cat(p)]
+    return res
 
-    if duracion:
-
-        def duracion_en_minutos(d: str) -> int:
-            horas, minutos = d.split("h ")
-            minutos = minutos.replace("m", "")
-            return int(horas) * 60 + int(minutos)
-
-        if duracion == "corta":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) < 100
-            ]
-        elif duracion == "media":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if 100 <= duracion_en_minutos(pelicula["duracion"]) <= 150
-            ]
-        elif duracion == "larga":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) > 150
-            ]
-
-    return resultados
-
-
-def quitar_tildes(texto: str) -> str:
-    texto_normalizado = unicodedata.normalize("NFD", texto)
-    texto_sin_tildes = "".join(
-        c for c in texto_normalizado if unicodedata.category(c) != "Mn"
-    )
-    return texto_sin_tildes
-
-
-# Precios
-def precio_por_estreno(fecha_lanzamiento):
-    precio_estandar = 7999
-    precio_estreno = precio_estandar * 1.35
-    hoy = datetime.now()
-    dias_estreno = (hoy - fecha_lanzamiento).days
-    return precio_estandar if dias_estreno >= 7 else precio_estreno
-
-
-def formatear_moneda(valor):
-    entero, dec = f"{valor:,.2f}".split(".")
-    return f"$ {entero.replace(',', '.')},{dec}"
-
-
-def precio_por_perfil(edad, movistar):
-    precio_estandar = 7999
-    precio_movistar = 7500
-    precio_reducido = 6999
-    if edad > 65:
-        return "Jubilado", formatear_moneda(precio_reducido)
-    elif edad < 6:
-        return "Menor", formatear_moneda(precio_reducido)
-    elif movistar == 1:
-        return "Movistar", formatear_moneda(precio_movistar)
-    else:
-        return "Entrada", formatear_moneda(precio_estandar)
-
-
-# Butacas
+#Butacas
 def mostrar_sala(butacas):
     print("Sala:")
     for fila in butacas:
         for asiento in fila:
-            print("O" if asiento == 0 else "X", end=" ")
+            print("O" if asiento==0 else "X",end=" ")
         print()
     print()
 
-
-def reservar_butaca(butacas, f, c):
-    if butacas[f][c] == 0:
-        butacas[f][c] = 1
-        print(f"Butaca ({f + 1}, {c + 1}) reservada ")
+def reservar_butaca(butacas,f,c):
+    if butacas[f][c]==0:
+        butacas[f][c]=1
+        print(f"Butaca ({f+1}, {c+1}) reservada ")
     else:
-        print(f"Butaca ({f + 1}, {c + 1}) ocupada")
+        print(f"Butaca ({f+1}, {c+1}) ocupada")
 
-
-filas = 5
-columnas = 8
-butacas = [[0 for _ in range(columnas)] for _ in range(filas)]
+filas=5
+columnas=8
+butacas=[[0 for _ in range(columnas)] for _ in range(filas)]

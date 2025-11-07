@@ -1,3 +1,67 @@
 .poster-container {
   max-width: 30%;
 }
+/* seleccion de entradas */
+form {
+  background-color: #1a1a1a;
+  color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #ffcc00;
+}
+
+.tira {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.tira__titulo {
+  color: #ffcc00;
+  font-weight: 600;
+}
+
+.tira__precio {
+  font-size: 16px;
+}
+
+.tira__cantidad input,
+.tira__extras input {
+  background-color: #111;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px 8px;
+  width: 80px;
+}
+
+.btn-primary {
+  background-color: #ffcc00;
+  border: none;
+  color: #000;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: #e6b800;
+}
+
+.btn-success {
+  background-color: #00c853;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-success:hover {
+  background-color: #00a043;
+}
