@@ -27,5 +27,5 @@ header {
   background-color: var(--quaternaryColor) !important;
 }
 .text-light {
-  color: var(--fgColor);
+  color: var(--fgColor) !important;
 }
