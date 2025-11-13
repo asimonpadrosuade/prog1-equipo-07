@@ -1,0 +1,11 @@
+{
+  "sala1": { "filas": 10, "columnas": 12, "tipo": "2D" },
+  "sala2": { "filas": 10, "columnas": 12, "tipo": "2D" },
+  "sala3": { "filas": 10, "columnas": 12, "tipo": "3D" },
+  "sala4": { "filas": 10, "columnas": 12, "tipo": "2D" },
+  "sala5": { "filas": 10, "columnas": 12, "tipo": "3D" },
+  "sala6": { "filas": 10, "columnas": 12, "tipo": "2D" },
+  "sala7": { "filas": 10, "columnas": 12, "tipo": "3D" },
+  "sala8": { "filas": 10, "columnas": 12, "tipo": "2D" },
+  "sala9": { "filas": 10, "columnas": 12, "tipo": "2D" }
+}
