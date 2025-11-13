@@ -1,9 +1,14 @@
 import uvicorn
-from fastapi import FastAPI, Request, Query
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Query, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.logica.funciones import buscar_peliculas, encontrar_peliculas
+from app.logica.utils import (
+    buscar_peliculas,
+    encontrar_peliculas,
+    cargar_funciones,
+    guardar_funciones,
+)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
@@ -32,11 +37,36 @@ def busqueda(
 
 
 @app.get("/pelicula/{pelicula_id}", response_class=HTMLResponse)
-def mostrar_pelicula(request: Request, pelicula_id: int):
+def pelicula(request: Request, pelicula_id: int):
     pelicula = encontrar_peliculas(pelicula_id)
     return templates.TemplateResponse(
         "peliculas.html", {"request": request, "pelicula": pelicula}
     )
+
+
+@app.get("/asientos/{funcion_id}", response_class=HTMLResponse)
+def asientos(request: Request, funcion_id: str):
+    funciones = cargar_funciones()
+    funcion = funciones.get(funcion_id)
+    return templates.TemplateResponse(
+        "asientos.html",
+        {"request": request, "funcion": funcion, "funcion_id": funcion_id},
+    )
+
+
+@app.post("/asientos/{funcion_id}/reservar")
+async def reservar_asientos(
+    request: Request, funcion_id: str, asientos: list[str] = Form(...)
+):
+    funciones = cargar_funciones()
+    funcion = funciones.get(funcion_id)
+    if not funcion:
+        return RedirectResponse("/", status_code=302)
+    for asiento in asientos:
+        fila, columna = map(int, asiento.split(","))
+        funcion["asientos"][fila][columna] = 1
+    guardar_funciones(funciones)
+    return RedirectResponse(f"/asientos/{funcion_id}", status_code=302)
 
 
 if __name__ == "__main__":

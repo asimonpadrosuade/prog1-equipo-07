@@ -1,27 +1,46 @@
+import json
+from pathlib import Path
 import string
 import unicodedata
 from datetime import datetime
-from app.data.peliculas import peliculas
+
+# Cargar peliculas
+peliculas_ruta = Path("app/data/peliculas.json")
+def cargar_peliculas():
+    with open(peliculas_ruta, encoding="utf-8") as f:
+        return json.load(f)
+
+#Cargar funciones
+funciones_ruta = Path("app/data/funciones.json")
+def cargar_funciones():
+    with open(funciones_ruta, encoding="utf-8") as f:
+        return json.load(f)
+    
+#Guardar funciones
+def guardar_funciones(funciones):
+    with open(funciones_ruta, "w", encoding="utf-8") as f:
+        json.dump(funciones, f, ensure_ascii=False, indent=2)
+
+peliculas = cargar_peliculas()
 
 # Mostrar peliculas
 def encontrar_peliculas(id: int):
-    for pelicula in peliculas:
-        if pelicula["id"] == id:
-            return pelicula
+    pelicula = peliculas.get(str(id))
+    if pelicula:
+        pelicula_con_id = dict(pelicula)
+        pelicula_con_id["id"] = id
+        return pelicula_con_id
     return None
 
 # Filtros de peliculas
 def buscar_peliculas(
     busqueda: str | None, categoria: str | None = None, duracion: str | None = None
 ):
-    resultados = peliculas
+    
+    resultados=[]
+    resultados = [{**pelicula, "id": id} for id, pelicula in peliculas.items()]
 
-    if busqueda:
-        resultados = [
-            pelicula
-            for pelicula in resultados
-            if busqueda.lower() in quitar_tildes(quitar_punt(pelicula["titulo"].lower()))
-        ]
+
 
     if categoria:
         categoria_filtrada = quitar_tildes(categoria.lower())
@@ -101,23 +120,3 @@ def precio_por_perfil(edad, movistar):
 
 
 # Butacas
-def mostrar_sala(butacas):
-    print("Sala:")
-    for fila in butacas:
-        for asiento in fila:
-            print("O" if asiento == 0 else "X", end=" ")
-        print()
-    print()
-
-
-def reservar_butaca(butacas, f, c):
-    if butacas[f][c] == 0:
-        butacas[f][c] = 1
-        print(f"Butaca ({f + 1}, {c + 1}) reservada ")
-    else:
-        print(f"Butaca ({f + 1}, {c + 1}) ocupada")
-
-
-filas = 5
-columnas = 8
-butacas = [[0 for _ in range(columnas)] for _ in range(filas)]
