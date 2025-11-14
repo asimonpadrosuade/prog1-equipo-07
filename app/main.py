@@ -13,7 +13,7 @@ from app.logica.utils import (
     agregar_funcion,
     obtener_funciones,
     peliculas,
-    PRECIOS  # agregado
+    PRECIOS
 )
 
 app = FastAPI()
@@ -109,7 +109,7 @@ def pelicula(request: Request, pelicula_id: int):
             "horarios": horarios,
             "fecha_selected": fecha_selected,
             "idioma_selected": idioma_selected,
-            "precios": PRECIOS,  # agregado acá
+            "precios": PRECIOS,
         },
     )
 

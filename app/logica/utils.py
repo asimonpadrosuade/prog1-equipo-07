@@ -1,10 +1,6 @@
 import json
-import string
-import unicodedata
 import bcrypt
 from pathlib import Path
-from datetime import datetime
-
 
 # Cargar peliculas
 peliculas_ruta = Path("app/data/peliculas.json")
@@ -64,14 +60,12 @@ def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
         "fecha": fecha,
         "hora": hora,
         "idioma": idioma,
-        "asientos": [
-            [0 for _ in range(columnas)] for _ in range(filas)
-        ],
+        "asientos": [[0 for _ in range(columnas)] for _ in range(filas)],
     }
     guardar_funciones(funciones)
 
 
-# Encryptar contraseña
+# Encryptar contraseña (solo para generar hashes)
 password = ""
 hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 print(hashed.decode())
@@ -102,18 +96,21 @@ def buscar_peliculas(
     busqueda: str | None, categoria: str | None = None, duracion: str | None = None
 ):
     funciones = cargar_funciones()
-    resultados = []
 
     resultados = [{**pelicula, "id": id} for id, pelicula in peliculas.items()]
     peliculas_con_funcion = {f["pelicula_id"] for f in funciones.values()}
-    resultados = [pelicula for pelicula in resultados if str(pelicula["id"]) in peliculas_con_funcion]
+    resultados = [
+        pelicula
+        for pelicula in resultados
+        if str(pelicula["id"]) in peliculas_con_funcion
+    ]
 
     if categoria:
-        categoria_filtrada = quitar_tildes(categoria.lower())
+        categoria_filtrada = categoria.lower()
         resultados = [
             pelicula
             for pelicula in resultados
-            if categoria_filtrada in quitar_tildes(str(pelicula["categoria"]).lower())
+            if categoria_filtrada in str(pelicula["categoria"]).lower()
         ]
 
     if duracion:
@@ -145,72 +142,34 @@ def buscar_peliculas(
     return resultados
 
 
-# Normalizar texto quitando tildes
-def quitar_tildes(texto: str) -> str:
-    texto_normalizado = unicodedata.normalize("NFD", texto)
-    texto_sin_tildes = "".join(
-        c for c in texto_normalizado if unicodedata.category(c) != "Mn"
-    )
-    return texto_sin_tildes
-
-
-# Normalizar texto quitando signo de puntuación y demas
-def quitar_punt(texto: str) -> str:
-    return texto.translate(str.maketrans("", "", string.punctuation))
-
-
-# Precios
+# Precios fijos por tipo de entrada
 PRECIOS = {"comun": 15000, "menor_jubilado": 10000, "movistar": 15000}
 
 
-def precio_por_estreno(fecha_lanzamiento):
-    precio_estandar = 7999
-    precio_estreno = precio_estandar * 1.35
-    hoy = datetime.now()
-    dias_estreno = (hoy - fecha_lanzamiento).days
-    return precio_estandar if dias_estreno >= 7 else precio_estreno
-
-
-def formatear_moneda(valor):
-    entero, dec = f"{valor:,.2f}".split(".")
-    return f"$ {entero.replace(',', '.')},{dec}"
-
-
-def precio_por_perfil(edad, movistar):
-    precio_estandar = 7999
-    precio_movistar = 7500
-    precio_reducido = 6999
-    if edad > 65:
-        return "Jubilado", formatear_moneda(precio_reducido)
-    elif edad < 6:
-        return "Menor", formatear_moneda(precio_reducido)
-    elif movistar == 1:
-        return "Movistar", formatear_moneda(precio_movistar)
-    else:
-        return "Entrada", formatear_moneda(precio_estandar)
-
-
-# Seleccion de funciones
+# Seleccion de funciones (fechas, idiomas, horarios)
 def obtener_funciones(funciones, fecha=None, idioma=None):
-    fechas = []
-    idiomas = []
-    horarios = []
-
-    for f in funciones:
-        if f["fecha"] not in fechas:
-            fechas.append(f["fecha"])
+    fechas = [f["fecha"] for f in funciones]
+    fechas = list(dict.fromkeys(fechas))
 
     if fecha:
-        for f in funciones:
-            if f["fecha"] == fecha and f["idioma"] not in idiomas:
-                idiomas.append(f["idioma"])
+        idiomas_disponibles = [
+            f["idioma"] for f in funciones if f["fecha"] == fecha
+        ]
+        idiomas_disponibles = list(dict.fromkeys(idiomas_disponibles))
+    else:
+        idiomas_disponibles = []
 
     if fecha and idioma:
-        for f in funciones:
-            if f["fecha"] == fecha and f["idioma"] == idioma and f["hora"] not in horarios:
-                horarios.append(f["hora"])
+        horarios = [
+            f["hora"]
+            for f in funciones
+            if f["fecha"] == fecha and f["idioma"] == idioma
+        ]
+        horarios = list(dict.fromkeys(horarios))
+    else:
+        horarios = []
 
-    return fechas, idiomas, horarios
+    return list(fechas), list(idiomas_disponibles), list(horarios)
 
 
 # Cargar salas
