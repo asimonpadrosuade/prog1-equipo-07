@@ -3,21 +3,23 @@ from fastapi import FastAPI, Request, Query, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 from app.logica.utils import (
     buscar_peliculas,
     encontrar_peliculas,
-    cargar_funciones,
-    guardar_funciones,
     encontrar_funciones,
     verificar_usuario,
     agregar_funcion,
     obtener_funciones,
-    peliculas
+    cargar_peliculas,
+    comprobar_admin,
+    cargar_salas,
+    cargar_funciones,
+    guardar_funciones,
 )
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
-
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
@@ -43,29 +45,46 @@ def busqueda(
 
 @app.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
-    if request.cookies.get("admin") == "1":
-        return RedirectResponse("/admin", status_code=302)
+    if comprobar_admin(request):
+        return RedirectResponse("/admin")
     return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.post("/login")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
     if verificar_usuario(username, password):
-        response = RedirectResponse("/admin", status_code=302)
-        response.set_cookie("admin", "1")
-        return response
+        r = RedirectResponse("/admin", status_code=302)
+        r.set_cookie("admin", "1")
+        return r
     return RedirectResponse("/login", status_code=302)
 
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin(request: Request):
-    if request.cookies.get("admin") != "1":
-        return RedirectResponse("/login", status_code=302)
+    if not comprobar_admin(request):
+        return RedirectResponse("/login")
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
+@app.get("/logout")
+def logout():
+    r = RedirectResponse("/", status_code=302)
+    r.delete_cookie("admin")
+    return r
+
+
+@app.get("/admin/funcion", response_class=HTMLResponse)
+def form_funcion(request: Request):
+    if not comprobar_admin(request):
+        return RedirectResponse("/login")
+    return templates.TemplateResponse(
+        "funcion.html",
+        {"request": request, "peliculas": cargar_peliculas(), "salas": cargar_salas()},
+    )
+
+
 @app.post("/admin/funcion")
-def funcion(
+def crear_funcion(
     request: Request,
     pelicula_id: str = Form(...),
     sala: str = Form(...),
@@ -73,30 +92,25 @@ def funcion(
     hora: str = Form(...),
     idioma: str = Form(...),
 ):
-    if request.cookies.get("admin") != "1":
-        return RedirectResponse("/login", status_code=302)
+    if not comprobar_admin(request):
+        return RedirectResponse("/login")
+
     agregar_funcion(pelicula_id, sala, fecha, hora, idioma)
     return RedirectResponse("/admin", status_code=302)
-
-
-@app.get("/admin/funcion", response_class=HTMLResponse)
-def mostrar_funciones(request: Request):
-    if request.cookies.get("admin") != "1":
-        return RedirectResponse("/login", status_code=302)
-    return templates.TemplateResponse(
-        "funcion.html", {"request": request, "peliculas": peliculas}
-    )
 
 
 @app.get("/pelicula/{pelicula_id}", response_class=HTMLResponse)
 def pelicula(request: Request, pelicula_id: int):
     pelicula = encontrar_peliculas(pelicula_id)
     funciones = encontrar_funciones(pelicula_id)
+
     fecha_selected = request.query_params.get("fecha")
     idioma_selected = request.query_params.get("idioma")
+
     fechas, idiomas, horarios = obtener_funciones(
         funciones, fecha_selected, idioma_selected
     )
+
     return templates.TemplateResponse(
         "peliculas.html",
         {
@@ -113,27 +127,43 @@ def pelicula(request: Request, pelicula_id: int):
 
 
 @app.get("/asientos/{funcion_id}", response_class=HTMLResponse)
-def asientos(request: Request, funcion_id: str):
+def asientos(request: Request, funcion_id: int):
     funciones = cargar_funciones()
-    funcion = funciones.get(funcion_id)
+    funcion_key = f"funcion{funcion_id}"
+    funcion = funciones.get(funcion_key)
+
+    if not funcion:
+        return RedirectResponse("/", status_code=302)
+
     return templates.TemplateResponse(
         "asientos.html",
-        {"request": request, "funcion": funcion, "funcion_id": funcion_id},
+        {
+            "request": request,
+            "funcion": funcion,
+            "funcion_id": funcion_id,
+        },
     )
 
 
 @app.post("/asientos/{funcion_id}/reservar")
-async def reservar_asientos(
-    request: Request, funcion_id: str, asientos: list[str] = Form(...)
+def reservar_asientos(
+    request: Request,
+    funcion_id: int,
+    asientos: list[str] = Form(...),
 ):
     funciones = cargar_funciones()
-    funcion = funciones.get(funcion_id)
+    funcion_key = f"funcion{funcion_id}"
+    funcion = funciones.get(funcion_key)
+
     if not funcion:
-        return RedirectResponse("/", status_code=302)
+        return RedirectResponse("/")
+
     for asiento in asientos:
         fila, columna = map(int, asiento.split(","))
         funcion["asientos"][fila][columna] = 1
+
     guardar_funciones(funciones)
+
     return RedirectResponse(f"/asientos/{funcion_id}", status_code=302)
 
 

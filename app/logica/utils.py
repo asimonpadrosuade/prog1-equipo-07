@@ -3,60 +3,85 @@ import string
 import unicodedata
 import bcrypt
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import lru_cache
 
-
-# Cargar peliculas
 peliculas_ruta = Path("app/data/peliculas.json")
+usuarios_ruta = Path("app/data/usuarios.json")
+funciones_ruta = Path("app/data/funciones.json")
+salas_ruta = Path("app/data/salas.json")
 
 
+@lru_cache()
 def cargar_peliculas():
     with open(peliculas_ruta, encoding="utf-8") as f:
         return json.load(f)
 
 
-peliculas = cargar_peliculas()
-
-# Cargar usuarios
-usuarios_ruta = Path("app/data/usuarios.json")
-
-
+@lru_cache()
 def cargar_usuarios():
-    with open(funciones_ruta, encoding="utf-8") as f:
+    with open(usuarios_ruta, encoding="utf-8") as f:
         return json.load(f)
 
 
-# Verificar usuario
-def verificar_usuario(username, password):
-    with open(usuarios_ruta, encoding="utf-8") as f:
-        usuarios = json.load(f)
-    user = usuarios.get(username)
-    if user and bcrypt.checkpw(password.encode(), user["password"].encode()):
-        return True
-    return False
-
-
-# Cargar funciones
-funciones_ruta = Path("app/data/funciones.json")
-
-
+@lru_cache()
 def cargar_funciones():
     with open(funciones_ruta, encoding="utf-8") as f:
         return json.load(f)
 
 
-# Guardar funciones
+@lru_cache()
+def cargar_salas():
+    with open(salas_ruta, encoding="utf-8") as f:
+        return json.load(f)
+    
+def comprobar_admin(request):
+    return request.cookies.get("admin") == "1"
+
+
 def guardar_funciones(funciones):
     with open(funciones_ruta, "w", encoding="utf-8") as f:
         json.dump(funciones, f, ensure_ascii=False, indent=2)
+    cargar_funciones.cache_clear()
 
 
-# Agregar funciones
+def verificar_usuario(username, password):
+    usuarios = cargar_usuarios()
+    user = usuarios.get(username)
+    return user and bcrypt.checkpw(password.encode(), user["password"].encode())
+
+
+def duracion_en_minutos(d):
+    horas, minutos = d.lower().replace("m", "").split("h")
+    return int(horas.strip()) * 60 + int(minutos.strip())
+
+
 def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
     funciones = cargar_funciones()
     salas = cargar_salas()
+    peliculas = cargar_peliculas()
+
+    pelicula = peliculas[str(pelicula_id)]
+    dur_nueva = duracion_en_minutos(pelicula["duracion"]) + 30
+
+    nueva_ini = datetime.strptime(f"{fecha} {hora}", "%Y-%m-%d %H:%M")
+    nueva_fin = nueva_ini + timedelta(minutes=dur_nueva)
+
+    for f in funciones.values():
+        if f["sala"] == sala and f["fecha"] == fecha:
+            existente_ini = datetime.strptime(f"{f['fecha']} {f['hora']}", "%Y-%m-%d %H:%M")
+            dur_exist = duracion_en_minutos(peliculas[str(f["pelicula_id"])]["duracion"]) + 30
+            existente_fin = existente_ini + timedelta(minutes=dur_exist)
+
+            if existente_ini < nueva_fin and nueva_ini < existente_fin:
+                raise ValueError(
+                    f"Conflicto de horario: la función existente termina a las "
+                    f"{existente_fin.strftime('%H:%M')}."
+                )
+
     filas = salas[sala]["filas"]
     columnas = salas[sala]["columnas"]
+
     nueva_id = f"funcion{len(funciones) + 1}"
     funciones[nueva_id] = {
         "pelicula_id": pelicula_id,
@@ -64,20 +89,12 @@ def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
         "fecha": fecha,
         "hora": hora,
         "idioma": idioma,
-        "asientos": [
-            [0 for _ in range(columnas)] for _ in range(filas)
-        ],
+        "asientos": [[0] * columnas for _ in range(filas)],
     }
+
     guardar_funciones(funciones)
 
 
-# Encryptar contraseña
-password = ""
-hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-print(hashed.decode())
-
-
-# Mostrar funciones
 def encontrar_funciones(pelicula_id):
     funciones = cargar_funciones()
     return [
@@ -87,130 +104,90 @@ def encontrar_funciones(pelicula_id):
     ]
 
 
-# Mostrar peliculas
-def encontrar_peliculas(id: int):
+def encontrar_peliculas(id):
+    peliculas = cargar_peliculas()
     pelicula = peliculas.get(str(id))
-    if pelicula:
-        pelicula_con_id = dict(pelicula)
-        pelicula_con_id["id"] = id
-        return pelicula_con_id
-    return None
+    return {**pelicula, "id": id} if pelicula else None
 
 
-# Filtros de peliculas
-def buscar_peliculas(
-    busqueda: str | None, categoria: str | None = None, duracion: str | None = None
-):
+def quitar_tildes(t):
+    return "".join(c for c in unicodedata.normalize("NFD", t) if unicodedata.category(c) != "Mn")
+
+
+def quitar_punt(t):
+    return t.translate(str.maketrans("", "", string.punctuation))
+
+
+def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
+    peliculas = cargar_peliculas()
     funciones = cargar_funciones()
-    resultados = []
 
-    resultados = [{**pelicula, "id": id} for id, pelicula in peliculas.items()]
-    peliculas_con_funcion = {f["pelicula_id"] for f in funciones.values()}
-    resultados = [pelicula for pelicula in resultados if str(pelicula["id"]) in peliculas_con_funcion]
+    resultados = [{**p, "id": int(id)} for id, p in peliculas.items()]
+    usadas = {f["pelicula_id"] for f in funciones.values()}
+    resultados = [p for p in resultados if str(p["id"]) in usadas]
+
+    if busqueda:
+        b = quitar_tildes(str(busqueda).lower())
+        filtrados = []
+        for p in resultados:
+            titulo = p.get("titulo", "")
+            titulo_normalizado = quitar_tildes(str(titulo).lower())
+            if b in titulo_normalizado:
+                filtrados.append(p)
+        resultados = filtrados
 
     if categoria:
-        categoria_filtrada = quitar_tildes(categoria.lower())
-        resultados = [
-            pelicula
-            for pelicula in resultados
-            if categoria_filtrada in quitar_tildes(str(pelicula["categoria"]).lower())
-        ]
+        cat = quitar_tildes(categoria.lower())
+        filtrados = []
+        for p in resultados:
+            categorias = p.get("categoria", [])
+            try:
+                categorias + ""
+            except Exception:
+                pass
+            else:
+                categorias = [categorias]
+            coincide = False
+            for c in categorias:
+                if cat in quitar_tildes(str(c).lower()):
+                    coincide = True
+            if coincide:
+                filtrados.append(p)
+        resultados = filtrados
 
     if duracion:
-
-        def duracion_en_minutos(d: str) -> int:
-            horas, minutos = d.split("h ")
-            minutos = minutos.replace("m", "")
-            return int(horas) * 60 + int(minutos)
-
         if duracion == "corta":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) < 100
-            ]
+            resultados = [p for p in resultados if duracion_en_minutos(p["duracion"]) < 100]
         elif duracion == "media":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if 100 <= duracion_en_minutos(pelicula["duracion"]) <= 150
-            ]
+            resultados = [p for p in resultados if 100 <= duracion_en_minutos(p["duracion"]) <= 150]
         elif duracion == "larga":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) > 150
-            ]
+            resultados = [p for p in resultados if duracion_en_minutos(p["duracion"]) > 150]
 
     return resultados
 
 
-# Normalizar texto quitando tildes
-def quitar_tildes(texto: str) -> str:
-    texto_normalizado = unicodedata.normalize("NFD", texto)
-    texto_sin_tildes = "".join(
-        c for c in texto_normalizado if unicodedata.category(c) != "Mn"
-    )
-    return texto_sin_tildes
-
-
-# Normalizar texto quitando signo de puntuación y demas
-def quitar_punt(texto: str) -> str:
-    return texto.translate(str.maketrans("", "", string.punctuation))
-
-
-# Precios
 def precio_por_estreno(fecha_lanzamiento):
-    precio_estandar = 7999
-    precio_estreno = precio_estandar * 1.35
-    hoy = datetime.now()
-    dias_estreno = (hoy - fecha_lanzamiento).days
-    return precio_estandar if dias_estreno >= 7 else precio_estreno
+    base = 7999
+    estreno = base * 1.35
+    dias = (datetime.now() - fecha_lanzamiento).days
+    return estreno if dias < 7 else base
 
 
-def formatear_moneda(valor):
-    entero, dec = f"{valor:,.2f}".split(".")
-    return f"$ {entero.replace(',', '.')},{dec}"
+def formatear_moneda(v):
+    e, d = f"{v:,.2f}".split(".")
+    return f"$ {e.replace(',', '.')},{d}"
 
 
 def precio_por_perfil(edad, movistar):
-    precio_estandar = 7999
-    precio_movistar = 7500
-    precio_reducido = 6999
-    if edad > 65:
-        return "Jubilado", formatear_moneda(precio_reducido)
-    elif edad < 6:
-        return "Menor", formatear_moneda(precio_reducido)
-    elif movistar == 1:
-        return "Movistar", formatear_moneda(precio_movistar)
-    else:
-        return "Entrada", formatear_moneda(precio_estandar)
+    if edad > 65 or edad < 6:
+        return "Jubilado/Menor", formatear_moneda(6999)
+    if movistar == 1:
+        return "Movistar", formatear_moneda(7500)
+    return "Entrada", formatear_moneda(7999)
 
-# Seleccion de funciones
+
 def obtener_funciones(funciones, fecha=None, idioma=None):
-    fechas = []
-    idiomas = []
-    horarios = []
-
-    for f in funciones:
-        if f["fecha"] not in fechas:
-            fechas.append(f["fecha"])
-
-    if fecha:
-        for f in funciones:
-            if f["fecha"] == fecha and f["idioma"] not in idiomas:
-                idiomas.append(f["idioma"])
-
-    if fecha and idioma:
-        for f in funciones:
-            if f["fecha"] == fecha and f["idioma"] == idioma and f["hora"] not in horarios:
-                horarios.append(f["hora"])
-
-    return fechas, idiomas, horarios
-
-# Cargar salas
-salas_ruta = Path("app/data/salas.json")
-
-def cargar_salas():
-    with open(salas_ruta, encoding="utf-8") as f:
-        return json.load(f)
+    fechas = {f["fecha"] for f in funciones}
+    idiomas_disponibles = {f["idioma"] for f in funciones if f["fecha"] == fecha} if fecha else []
+    horarios = {f["hora"] for f in funciones if f["fecha"] == fecha and f["idioma"] == idioma} if fecha and idioma else []
+    return list(fechas), list(idiomas_disponibles), list(horarios)
