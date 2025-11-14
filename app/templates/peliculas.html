@@ -39,49 +39,139 @@
             <p class="descripcion text-light fs-5">{{ pelicula.sinopsis }}</p>
           </div>
           <div class="categorias-container"></div>
+
           <div class="funciones-container">
             {% if funciones %}
-    <form method="get" action="">
-      <!-- Selección de Fecha -->
-      <label for="fecha" class="text-light mt-3">Fecha:</label>
-      <select id="fecha" name="fecha" class="form-select mb-2" onchange="this.form.submit()">
-        <option value="">Selecciona una fecha</option>
-        {% for fecha in fechas %}
-          <option value="{{ fecha }}" {% if fecha_selected == fecha %}selected{% endif %}>{{ fecha }}</option>
-        {% endfor %}
-      </select>
+              <form method="get" action="">
+                <!-- Selección de Fecha -->
+                <label for="fecha" class="text-light mt-3">Fecha:</label>
+                <select
+                  id="fecha"
+                  name="fecha"
+                  class="form-select mb-2"
+                  onchange="this.form.submit()"
+                >
+                  <option value="">Selecciona una fecha</option>
+                  {% for fecha in fechas %}
+                    <option
+                      value="{{ fecha }}"
+                      {% if fecha_selected == fecha %}selected{% endif %}
+                    >
+                      {{ fecha }}
+                    </option>
+                  {% endfor %}
+                </select>
 
-      <!-- Selección de Idioma -->
-      {% if fecha_selected %}
-        <label for="idioma" class="text-light mt-3">Idioma:</label>
-        <select id="idioma" name="idioma" class="form-select mb-2" onchange="this.form.submit()">
-          <option value="">Selecciona un idioma</option>
-          {% for idioma in idiomas %}
-            <option value="{{ idioma }}" {% if idioma_selected == idioma %}selected{% endif %}>{{ idioma }}</option>
-          {% endfor %}
-        </select>
-      {% endif %}
+                <!-- Selección de Idioma -->
+                {% if fecha_selected %}
+                  <label for="idioma" class="text-light mt-3">Idioma:</label>
+                  <select
+                    id="idioma"
+                    name="idioma"
+                    class="form-select mb-2"
+                    onchange="this.form.submit()"
+                  >
+                    <option value="">Selecciona un idioma</option>
+                    {% for idioma in idiomas %}
+                      <option
+                        value="{{ idioma }}"
+                        {% if idioma_selected == idioma %}selected{% endif %}
+                      >
+                        {{ idioma }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                {% endif %}
 
-      <!-- Selección de Horario -->
-      {% if fecha_selected and idioma_selected %}
-        <label for="hora" class="text-light mt-3">Horario:</label>
-        <select id="hora" name="hora" class="form-select mb-2">
-          <option value="">Selecciona un horario</option>
-          {% for hora in horarios %}
-            <option value="{{ hora }}">{{ hora }}</option>
-          {% endfor %}
-        </select>
-      {% endif %}
-    </form>
-  {% else %}
-    <p class="text-light mt-4">
-      No hay funciones disponibles para esta película.
-    </p>
-  {% endif %}
-</div>
+                <!-- Selección de Horario -->
+                {% if fecha_selected and idioma_selected %}
+                  <label for="hora" class="text-light mt-3">Horario:</label>
+                  <select
+                    id="hora"
+                    name="hora"
+                    class="form-select mb-2"
+                    onchange="mostrarEntradas()"
+                  >
+                    <option value="">Selecciona un horario</option>
+                    {% for hora in horarios %}
+                      <option value="{{ hora }}">{{ hora }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <!-- BLOQUE DE PRECIOS / SELECCION DE ENTRADAS -->
+                  <div
+                    id="entradas-box"
+                    class="mt-4 p-3 rounded"
+                    style="display:none; background:var(--primaryColor);"
+                  >
+                    <h4 class="text-light mb-3">Seleccioná tus entradas</h4>
+
+                    <div class="mb-3">
+                      <label class="text-light d-block">
+                        Entrada común - ${{ precios.comun }}
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value="0"
+                        class="form-control"
+                      />
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="text-light d-block">
+                        Menor / Jubilado - ${{ precios.menor_jubilado }}
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value="0"
+                        class="form-control"
+                      />
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="text-light d-block">
+                        Movistar - ${{ precios.movistar }}
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value="0"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+                {% endif %}
+              </form>
+            {% else %}
+              <p class="text-light mt-4">
+                No hay funciones disponibles para esta película.
+              </p>
+            {% endif %}
+          </div>
         </div>
       </div>
     </main>
+
     <footer></footer>
+
+    <script>
+      function mostrarEntradas() {
+        const selectHora=document.getElementById("hora");
+        const box=document.getElementById("entradas-box");
+        if(!selectHora||!box)return;
+        if(selectHora.value!==""){
+          box.style.display="block";
+        }else{
+          box.style.display="none";
+        }
+      }
+    </script>
   </body>
 </html>
+
+

@@ -160,6 +160,9 @@ def quitar_punt(texto: str) -> str:
 
 
 # Precios
+PRECIOS = {"comun": 15000, "menor_jubilado": 10000, "movistar": 15000}
+
+
 def precio_por_estreno(fecha_lanzamiento):
     precio_estandar = 7999
     precio_estreno = precio_estandar * 1.35
@@ -186,6 +189,7 @@ def precio_por_perfil(edad, movistar):
     else:
         return "Entrada", formatear_moneda(precio_estandar)
 
+
 # Seleccion de funciones
 def obtener_funciones(funciones, fecha=None, idioma=None):
     fechas = []
@@ -208,8 +212,10 @@ def obtener_funciones(funciones, fecha=None, idioma=None):
 
     return fechas, idiomas, horarios
 
+
 # Cargar salas
 salas_ruta = Path("app/data/salas.json")
+
 
 def cargar_salas():
     with open(salas_ruta, encoding="utf-8") as f:
