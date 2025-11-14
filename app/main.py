@@ -7,20 +7,19 @@ from fastapi.templating import Jinja2Templates
 from app.logica.utils import (
     buscar_peliculas,
     encontrar_peliculas,
-    cargar_funciones,
-    guardar_funciones,
     encontrar_funciones,
     verificar_usuario,
     agregar_funcion,
     obtener_funciones,
     cargar_peliculas,
     comprobar_admin,
-    cargar_salas
+    cargar_salas,
+    cargar_funciones,
+    guardar_funciones,
 )
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
-
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
@@ -54,9 +53,9 @@ def login_form(request: Request):
 @app.post("/login")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
     if verificar_usuario(username, password):
-        response = RedirectResponse("/admin", status_code=302)
-        response.set_cookie("admin", "1")
-        return response
+        r = RedirectResponse("/admin", status_code=302)
+        r.set_cookie("admin", "1")
+        return r
     return RedirectResponse("/login", status_code=302)
 
 
@@ -66,25 +65,21 @@ def admin(request: Request):
         return RedirectResponse("/login")
     return templates.TemplateResponse("admin.html", {"request": request})
 
+
 @app.get("/logout")
 def logout():
-    response = RedirectResponse("/", status_code=302)
-    response.delete_cookie("admin")
-    return response
+    r = RedirectResponse("/", status_code=302)
+    r.delete_cookie("admin")
+    return r
+
 
 @app.get("/admin/funcion", response_class=HTMLResponse)
-def admin_funciones(request: Request):
+def form_funcion(request: Request):
     if not comprobar_admin(request):
         return RedirectResponse("/login")
-    peliculas = cargar_peliculas()
-    salas = cargar_salas()
     return templates.TemplateResponse(
         "funcion.html",
-        {
-            "request": request,
-            "peliculas": peliculas,
-            "salas": salas
-        },
+        {"request": request, "peliculas": cargar_peliculas(), "salas": cargar_salas()},
     )
 
 

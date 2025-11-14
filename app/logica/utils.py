@@ -126,9 +126,34 @@ def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
     usadas = {f["pelicula_id"] for f in funciones.values()}
     resultados = [p for p in resultados if str(p["id"]) in usadas]
 
+    if busqueda:
+        b = quitar_tildes(str(busqueda).lower())
+        filtrados = []
+        for p in resultados:
+            titulo = p.get("titulo", "")
+            titulo_normalizado = quitar_tildes(str(titulo).lower())
+            if b in titulo_normalizado:
+                filtrados.append(p)
+        resultados = filtrados
+
     if categoria:
         cat = quitar_tildes(categoria.lower())
-        resultados = [p for p in resultados if cat in quitar_tildes(p["categoria"].lower())]
+        filtrados = []
+        for p in resultados:
+            categorias = p.get("categoria", [])
+            try:
+                categorias + ""
+            except Exception:
+                pass
+            else:
+                categorias = [categorias]
+            coincide = False
+            for c in categorias:
+                if cat in quitar_tildes(str(c).lower()):
+                    coincide = True
+            if coincide:
+                filtrados.append(p)
+        resultados = filtrados
 
     if duracion:
         if duracion == "corta":
