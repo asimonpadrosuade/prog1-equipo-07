@@ -15,7 +15,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/styles/all.css" />
-    <link rel="stylesheet" href="/static/styles/.css" />
   </head>
   <body class="mx-lg-5 mx-md-2 mx-sm-0">
     <header>
@@ -27,8 +26,8 @@
         <label>Película:</label>
         <select name="pelicula_id" required>
           <option value="" disabled selected>Selecciona una película</option>
-          {% for id, pelicula in peliculas.items() %}
-          <option value="{{ id }}">{{ pelicula.titulo }}</option>
+          {% for pelicula in peliculas %}
+          <option value="{{ pelicula.id }}">{{ pelicula.titulo }}</option>
           {% endfor %}
         </select>
         <br />
