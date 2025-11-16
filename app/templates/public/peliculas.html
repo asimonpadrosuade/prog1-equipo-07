@@ -42,7 +42,6 @@
           <div class="funciones-container">
             {% if funciones %}
     <form method="get" action="">
-      <!-- Selección de Fecha -->
       <label for="fecha" class="text-light mt-3">Fecha:</label>
       <select id="fecha" name="fecha" class="form-select mb-2" onchange="this.form.submit()">
         <option value="">Selecciona una fecha</option>
@@ -50,8 +49,6 @@
           <option value="{{ fecha }}" {% if fecha_selected == fecha %}selected{% endif %}>{{ fecha }}</option>
         {% endfor %}
       </select>
-
-      <!-- Selección de Idioma -->
       {% if fecha_selected %}
         <label for="idioma" class="text-light mt-3">Idioma:</label>
         <select id="idioma" name="idioma" class="form-select mb-2" onchange="this.form.submit()">
@@ -62,7 +59,6 @@
         </select>
       {% endif %}
 
-      <!-- Selección de Horario -->
       {% if fecha_selected and idioma_selected %}
         <label for="hora" class="text-light mt-3">Horario:</label>
         <select id="hora" name="hora" class="form-select mb-2">
