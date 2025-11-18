@@ -8,6 +8,9 @@ from app.logica.utils import (
     encontrar_peliculas,
     cargar_funciones,
     guardar_funciones,
+    cargar_salas,                         
+    obtener_o_crear_butacas_por_funcion,  
+    reservar_butaca_funcion,              
 )
 
 app = FastAPI()
@@ -48,9 +51,22 @@ def pelicula(request: Request, pelicula_id: int):
 def asientos(request: Request, funcion_id: str):
     funciones = cargar_funciones()
     funcion = funciones.get(funcion_id)
+
+    if not funcion:
+        return RedirectResponse("/", status_code=302)
+
+    salas = cargar_salas()
+    butacas = obtener_o_crear_butacas_por_funcion(funcion, salas)
+    guardar_funciones(funciones)
+
     return templates.TemplateResponse(
         "asientos.html",
-        {"request": request, "funcion": funcion, "funcion_id": funcion_id},
+        {
+            "request": request,
+            "funcion": funcion,
+            "funcion_id": funcion_id,
+            "butacas": butacas,
+        },
     )
 
 
@@ -59,12 +75,12 @@ async def reservar_asientos(
     request: Request, funcion_id: str, asientos: list[str] = Form(...)
 ):
     funciones = cargar_funciones()
-    funcion = funciones.get(funcion_id)
-    if not funcion:
-        return RedirectResponse("/", status_code=302)
+
     for asiento in asientos:
         fila, columna = map(int, asiento.split(","))
-        funcion["asientos"][fila][columna] = 1
+        resultado = reservar_butaca_funcion(funciones, funcion_id, fila, columna)
+        # Podrías loguear resultado["msg"] si querés
+
     guardar_funciones(funciones)
     return RedirectResponse(f"/asientos/{funcion_id}", status_code=302)
 

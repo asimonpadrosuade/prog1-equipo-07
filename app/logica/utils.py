@@ -120,3 +120,52 @@ def precio_por_perfil(edad, movistar):
 
 
 # Butacas
+
+
+salas_ruta = Path("app/data/salas.json")
+
+def cargar_salas():
+    with open(salas_ruta, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def obtener_o_crear_butacas_por_funcion(funcion: dict, salas: dict) -> list[list[int]]:
+    sala_id = funcion.get("sala")
+
+    if sala_id is None:
+        raise ValueError("La función seleccionada no tiene sala asignada")
+
+    sala_cfg = salas.get(sala_id)
+    if sala_cfg is None:
+        raise ValueError(f"Sala '{sala_id}' no definida en salas.json")
+
+    filas = sala_cfg["filas"]
+    columnas = sala_cfg["columnas"]
+
+    if not funcion.get("butacas"):
+        funcion["butacas"] = [[0 for _ in range(columnas)] for _ in range(filas)]
+
+    return funcion["butacas"]
+def reservar_butaca_funcion(funciones, funcion_id, fila, columna):
+    salas = cargar_salas()
+    funcion = funciones.get(str(funcion_id))
+
+    if not funcion:
+        return {"ok": False, "msg": "La función no existe"}
+
+    butacas = obtener_o_crear_butacas_por_funcion(funcion, salas)
+
+    f_idx = fila - 1
+    c_idx = columna - 1
+
+    # Verificar límites
+    if f_idx < 0 or c_idx < 0 or f_idx >= len(butacas) or c_idx >= len(butacas[0]):
+        return {"ok": False, "msg": "La butaca no existe en esta sala"}
+
+    # Ocupada
+    if butacas[f_idx][c_idx] == 1:
+        return {"ok": False, "msg": "La butaca ya está ocupada"}
+
+    # Reservar
+    butacas[f_idx][c_idx] = 1
+    return {"ok": True, "msg": "Reserva exitosa"}
