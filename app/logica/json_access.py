@@ -1,39 +1,35 @@
-from pathlib import Path
-from functools import lru_cache
 import json
+from json import JSONDecodeError
+from pathlib import Path
 
-# Acceder
-peliculas_ruta = Path("app/data/peliculas.json")
-usuarios_ruta = Path("app/data/usuarios.json")
-funciones_ruta = Path("app/data/funciones.json")
-salas_ruta = Path("app/data/salas.json")
+def cargar_json(nombre):
+    ruta = Path("app/data") / nombre
 
-# Cargar
-@lru_cache()
-def cargar_peliculas():
-    with peliculas_ruta.open(encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with ruta.open("r", encoding="utf-8") as f:
+            return json.load(f)
 
+    except FileNotFoundError as e:
+        registrar_error(e)
+        return {}
 
-@lru_cache()
-def cargar_usuarios():
-    with usuarios_ruta.open(encoding="utf-8") as f:
-        return json.load(f)
+    except JSONDecodeError as e:
+        registrar_error(e)
+        return {}
 
-
-@lru_cache()
-def cargar_funciones():
-    with funciones_ruta.open(encoding="utf-8") as f:
-        return json.load(f)
-
-
-@lru_cache()
-def cargar_salas():
-    with salas_ruta.open(encoding="utf-8") as f:
-        return json.load(f)
 
 # Guardar
-def guardar_funciones(funciones):
-    with funciones_ruta.open("w", encoding="utf-8") as f:
-        json.dump(funciones, f, ensure_ascii=False, indent=2)
-    cargar_funciones.cache_clear()
+def guardar_json(data, nombre):
+    ruta = Path("app/data") / nombre
+
+    try:
+        with ruta.open("w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        registrar_error(e)
+        print(f"Error al guardar JSON en {ruta}")
+
+def registrar_error(e):
+    with open("errores.log", "a") as log:
+        linea = f"Tipo: {type(e)} | Mensaje: {str(e)}\n"
+        log.write(linea)

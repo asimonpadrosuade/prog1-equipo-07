@@ -11,7 +11,7 @@ from app.logica.utils import (
     agregar_funcion,
 )
 from app.logica.auth import comprobar_admin, verificar_usuario
-from app.logica.json_access import cargar_peliculas, cargar_salas
+from app.logica.json_access import cargar_json
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
@@ -44,13 +44,13 @@ def busqueda(
 def pelicula(request: Request, pelicula_id: int):
     pelicula = encontrar_peliculas(pelicula_id)
     funciones = encontrar_funciones(pelicula_id)
+    precios = cargar_json("precios.json")
 
     fecha_selected = request.query_params.get("fecha")
     idioma_selected = request.query_params.get("idioma")
+    hora_selected = request.query_params.get("hora")
 
-    fechas, idiomas, horarios = obtener_funciones(
-        funciones, fecha_selected, idioma_selected
-    )
+    fechas, idiomas, horarios = obtener_funciones(funciones, fecha_selected, idioma_selected)
 
     return templates.TemplateResponse(
         "public/peliculas.html",
@@ -63,6 +63,8 @@ def pelicula(request: Request, pelicula_id: int):
             "horarios": horarios,
             "fecha_selected": fecha_selected,
             "idioma_selected": idioma_selected,
+            "hora_selected": hora_selected,
+            "precios": precios,
         },
     )
 
@@ -85,7 +87,7 @@ def form_funcion(request: Request):
         return RedirectResponse("/login")
     return templates.TemplateResponse(
         "admin/funcion.html",
-        {"request": request, "peliculas": cargar_peliculas(), "salas": cargar_salas()},
+        {"request": request, "peliculas": cargar_json("peliculas.json"), "salas": cargar_json("salas.json")},
     )
 
 @app.post("/admin/funcion")
