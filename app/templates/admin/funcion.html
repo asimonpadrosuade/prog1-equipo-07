@@ -15,7 +15,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/styles/all.css" />
-    <link rel="stylesheet" href="/static/styles/.css" />
   </head>
   <body class="mx-lg-5 mx-md-2 mx-sm-0">
     <header>
@@ -23,32 +22,40 @@
     </header>
     <main>
       <h2>Agregar funcion</h2>
-    <form method="post" action="/admin/funcion">
+      <form method="post" action="/admin/funcion">
         <label>Película:</label>
         <select name="pelicula_id" required>
-            <option value="" disabled selected>Selecciona una película</option>
-            {% for id, pelicula in peliculas.items() %}
-                <option value="{{ id }}">{{ pelicula.titulo or ("Película " ~ id) }}</option>
-            {% endfor %}
+          <option value="" disabled selected>Selecciona una película</option>
+          {% for pelicula in peliculas %}
+          <option value="{{ pelicula.id }}">{{ pelicula.titulo }}</option>
+          {% endfor %}
         </select>
-        <br>
+        <br />
         <label>Sala:</label>
-        <input type="text" name="sala" required>
-        <br>
+        <select name="sala" required>
+          <option value="" disabled selected>Selecciona una sala</option>
+          {% for sala_id, sala in salas.items() %}
+          <option value="{{ sala_id }}">
+            {{ sala_id }} - {{ sala.tipo }} ({{ sala.filas }}x{{ sala.columnas
+            }})
+          </option>
+          {% endfor %}
+        </select>
+        <br />
         <label>Fecha:</label>
-        <input type="date" name="fecha" required>
-        <br>
+        <input type="date" name="fecha" required />
+        <br />
         <label>Hora:</label>
-        <input type="time" name="hora" required>
-        <br>
+        <input type="time" name="hora" required />
+        <br />
         <label>Idioma:</label>
         <select name="idioma" required>
-            <option value="Castellano">Castellano</option>
-            <option value="Subtitulado">Subtitulado</option>
+          <option value="Castellano">Castellano</option>
+          <option value="Subtitulado">Subtitulado</option>
         </select>
-        <br>
+        <br />
         <button type="submit">Agregar función</button>
-    </form>
+      </form>
     </main>
     <footer></footer>
   </body>

@@ -49,13 +49,15 @@ def guardar_funciones(funciones):
 
 # Agregar funciones
 def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
-    funciones = cargar_funciones()
-    salas = cargar_salas()
+    funciones = cargar_json("funciones.json")
+    salas = cargar_json("salas.json")
+    if not comprobar_funciones(int(pelicula_id), sala, fecha, hora):
+        return
     filas = salas[sala]["filas"]
     columnas = salas[sala]["columnas"]
-    nueva_id = f"funcion{len(funciones) + 1}"
+    nueva_id = str(len(funciones) + 1)
     funciones[nueva_id] = {
-        "pelicula_id": pelicula_id,
+        "pelicula_id": int(pelicula_id),
         "sala": sala,
         "fecha": fecha,
         "hora": hora,
@@ -73,21 +75,18 @@ print(hashed.decode())
 
 # Mostrar funciones
 def encontrar_funciones(pelicula_id):
-    funciones = cargar_funciones()
+    funciones = cargar_json("funciones.json")
     return [
         {"id": fid, **f}
         for fid, f in funciones.items()
-        if str(f["pelicula_id"]) == str(pelicula_id)
+        if int(f["pelicula_id"]) == int(pelicula_id)
     ]
 
-
-# Mostrar peliculas
-def encontrar_peliculas(id: int):
-    pelicula = peliculas.get(str(id))
-    if pelicula:
-        pelicula_con_id = dict(pelicula)
-        pelicula_con_id["id"] = id
-        return pelicula_con_id
+# Encontrar pelicula por id
+def encontrar_peliculas(lista, pid):
+    for p in lista:
+        if int(p["id"]) == int(pid):
+            return p
     return None
 
 

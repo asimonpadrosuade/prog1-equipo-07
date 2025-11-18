@@ -6,22 +6,19 @@ from fastapi.templating import Jinja2Templates
 from app.logica.utils import (
     buscar_peliculas,
     encontrar_peliculas,
-    cargar_funciones,
-    guardar_funciones,
     encontrar_funciones,
-    verificar_usuario,
-    agregar_funcion,
     obtener_funciones,
-    peliculas,
-    PRECIOS
+    peliculas
 )
+from app.logica.auth import comprobar_admin, verificar_usuario
+from app.logica.json_access import cargar_json
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
-
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+# Pagina principal
 @app.get("/", response_class=HTMLResponse)
 def busqueda(
     request: Request,
@@ -31,7 +28,7 @@ def busqueda(
 ):
     resultados = buscar_peliculas(q, categoria, duracion)
     return templates.TemplateResponse(
-        "index.html",
+        "public/inicio.html",
         {
             "request": request,
             "peliculas": resultados,
@@ -42,64 +39,21 @@ def busqueda(
     )
 
 
-@app.get("/login", response_class=HTMLResponse)
-def login_form(request: Request):
-    if request.cookies.get("admin") == "1":
-        return RedirectResponse("/admin", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request})
-
-
-@app.post("/login")
-def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    if verificar_usuario(username, password):
-        response = RedirectResponse("/admin", status_code=302)
-        response.set_cookie("admin", "1")
-        return response
-    return RedirectResponse("/login", status_code=302)
-
-
-@app.get("/admin", response_class=HTMLResponse)
-def admin(request: Request):
-    if request.cookies.get("admin") != "1":
-        return RedirectResponse("/login", status_code=302)
-    return templates.TemplateResponse("admin.html", {"request": request})
-
-
-@app.post("/admin/funcion")
-def funcion(
-    request: Request,
-    pelicula_id: str = Form(...),
-    sala: str = Form(...),
-    fecha: str = Form(...),
-    hora: str = Form(...),
-    idioma: str = Form(...),
-):
-    if request.cookies.get("admin") != "1":
-        return RedirectResponse("/login", status_code=302)
-    agregar_funcion(pelicula_id, sala, fecha, hora, idioma)
-    return RedirectResponse("/admin", status_code=302)
-
-
-@app.get("/admin/funcion", response_class=HTMLResponse)
-def mostrar_funciones(request: Request):
-    if request.cookies.get("admin") != "1":
-        return RedirectResponse("/login", status_code=302)
-    return templates.TemplateResponse(
-        "funcion.html", {"request": request, "peliculas": peliculas}
-    )
-
-
+# Detalle de pelicula
 @app.get("/pelicula/{pelicula_id}", response_class=HTMLResponse)
 def pelicula(request: Request, pelicula_id: int):
-    pelicula = encontrar_peliculas(pelicula_id)
+    pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
     funciones = encontrar_funciones(pelicula_id)
+    precios = cargar_json("precios.json")
+
     fecha_selected = request.query_params.get("fecha")
     idioma_selected = request.query_params.get("idioma")
-    fechas, idiomas, horarios = obtener_funciones(
-        funciones, fecha_selected, idioma_selected
-    )
+    hora_selected = request.query_params.get("hora")
+
+    fechas, idiomas, horarios = obtener_funciones(funciones, fecha_selected, idioma_selected)
+
     return templates.TemplateResponse(
-        "peliculas.html",
+        "public/peliculas.html",
         {
             "request": request,
             "pelicula": pelicula,
@@ -109,35 +63,68 @@ def pelicula(request: Request, pelicula_id: int):
             "horarios": horarios,
             "fecha_selected": fecha_selected,
             "idioma_selected": idioma_selected,
-            "precios": PRECIOS,
         },
     )
 
 
+# Seleccion de asientos
 @app.get("/asientos/{funcion_id}", response_class=HTMLResponse)
-def asientos(request: Request, funcion_id: str):
-    funciones = cargar_funciones()
-    funcion = funciones.get(funcion_id)
+
+
+# Panel de admin
+@app.get("/admin", response_class=HTMLResponse)
+def admin(request: Request):
+    if not comprobar_admin(request):
+        return RedirectResponse("/login")
+    return templates.TemplateResponse("admin/inicio.html", {"request": request})
+
+
+@app.get("/admin/funcion", response_class=HTMLResponse)
+def form_funcion(request: Request):
+    if not comprobar_admin(request):
+        return RedirectResponse("/login")
     return templates.TemplateResponse(
-        "asientos.html",
-        {"request": request, "funcion": funcion, "funcion_id": funcion_id},
+        "admin/funcion.html",
+        {"request": request, "peliculas": cargar_json("peliculas.json"), "salas": cargar_json("salas.json")},
     )
 
-
-@app.post("/asientos/{funcion_id}/reservar")
-async def reservar_asientos(
-    request: Request, funcion_id: str, asientos: list[str] = Form(...)
+@app.post("/admin/funcion")
+def crear_funcion(
+    request: Request,
+    pelicula_id: str = Form(...),
+    sala: str = Form(...),
+    fecha: str = Form(...),
+    hora: str = Form(...),
+    idioma: str = Form(...),
 ):
-    funciones = cargar_funciones()
-    funcion = funciones.get(funcion_id)
-    if not funcion:
-        return RedirectResponse("/", status_code=302)
-    for asiento in asientos:
-        fila, columna = map(int, asiento.split(","))
-        funcion["asientos"][fila][columna] = 1
-    guardar_funciones(funciones)
-    return RedirectResponse(f"/asientos/{funcion_id}", status_code=302)
+    if not comprobar_admin(request):
+        return RedirectResponse("/login")
+    agregar_funcion(pelicula_id, sala, fecha, hora, idioma)
+    return RedirectResponse("/admin", status_code=302)
+
+# Login y logout
+@app.get("/login", response_class=HTMLResponse)
+def login_form(request: Request):
+    if comprobar_admin(request):
+        return RedirectResponse("/admin")
+    return templates.TemplateResponse("admin/login.html", {"request": request})
 
 
+@app.post("/login")
+def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    if verificar_usuario(username, password):
+        r = RedirectResponse("/admin", status_code=302)
+        r.set_cookie("admin", "1")
+        return r
+    return RedirectResponse("/login", status_code=302)
+
+
+@app.get("/logout")
+def logout():
+    r = RedirectResponse("/", status_code=302)
+    r.delete_cookie("admin")
+    return r
+
+# Correr app
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
