@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -29,7 +29,6 @@
             alt="Poster de {{ pelicula.titulo }}"
             class="img-fluid rounded-4 w-100"
           />
-          <p></p>
         </div>
         <div class="info-container col-8">
           <div class="texto-container d-flex gap-3 flex-column">
@@ -38,43 +37,91 @@
             </h1>
             <p class="descripcion text-light fs-5">{{ pelicula.sinopsis }}</p>
           </div>
-          <div class="categorias-container"></div>
           <div class="funciones-container">
             {% if funciones %}
-    <form method="get" action="">
-      <label for="fecha" class="text-light mt-3">Fecha:</label>
-      <select id="fecha" name="fecha" class="form-select mb-2" onchange="this.form.submit()">
-        <option value="">Selecciona una fecha</option>
-        {% for fecha in fechas %}
-          <option value="{{ fecha }}" {% if fecha_selected == fecha %}selected{% endif %}>{{ fecha }}</option>
-        {% endfor %}
-      </select>
-      {% if fecha_selected %}
-        <label for="idioma" class="text-light mt-3">Idioma:</label>
-        <select id="idioma" name="idioma" class="form-select mb-2" onchange="this.form.submit()">
-          <option value="">Selecciona un idioma</option>
-          {% for idioma in idiomas %}
-            <option value="{{ idioma }}" {% if idioma_selected == idioma %}selected{% endif %}>{{ idioma }}</option>
-          {% endfor %}
-        </select>
-      {% endif %}
-
-      {% if fecha_selected and idioma_selected %}
-        <label for="hora" class="text-light mt-3">Horario:</label>
-        <select id="hora" name="hora" class="form-select mb-2">
-          <option value="">Selecciona un horario</option>
-          {% for hora in horarios %}
-            <option value="{{ hora }}">{{ hora }}</option>
-          {% endfor %}
-        </select>
-      {% endif %}
-    </form>
-  {% else %}
-    <p class="text-light mt-4">
-      No hay funciones disponibles para esta película.
-    </p>
-  {% endif %}
-</div>
+            <form method="get" action="">
+              <label for="fecha" class="text-light mt-3">Fecha:</label>
+              <select
+                id="fecha"
+                name="fecha"
+                class="form-select mb-2"
+                onchange="this.form.submit()"
+              >
+                <option value="">Selecciona una fecha</option>
+                {% for fecha in fechas %}
+                <option value="{{ fecha }}" {% if fecha_selected == fecha %}selected{% endif %}>
+                  {{ fecha }}
+                </option>
+                {% endfor %}
+              </select>
+              {% if fecha_selected %}
+              <label for="idioma" class="text-light mt-3">Idioma:</label>
+              <select
+                id="idioma"
+                name="idioma"
+                class="form-select mb-2"
+                onchange="this.form.submit()"
+              >
+                <option value="">Selecciona un idioma</option>
+                {% for idioma in idiomas %}
+                <option value="{{ idioma }}" {% if idioma_selected == idioma %}selected{% endif %}>
+                  {{ idioma }}
+                </option>
+                {% endfor %}
+              </select>
+              {% endif %}
+              {% if fecha_selected and idioma_selected %}
+              <label for="hora" class="text-light mt-3">Horario:</label>
+              <select
+                id="hora"
+                name="hora"
+                class="form-select mb-2"
+                onchange="this.form.submit()"
+              >
+                <option value="">Selecciona un horario</option>
+                {% for hora in horarios %}
+                <option value="{{ hora }}" {% if hora_selected == hora %}selected{% endif %}>
+                  {{ hora }}
+                </option>
+                {% endfor %}
+              </select>
+              {% endif %}
+              {% if hora_selected %}
+              <div class="mt-5 rounded" style="background: var(--primaryColor)">
+                <div class="mb-3">
+                  <label class="text-light d-block">Entrada común - ${{ precios['comun'] }}</label>
+                  <select name="comun" class="form-select">
+                    {% for n in range(0,6) %}
+                    <option value="{{ n }}" {% if request.query_params.get('comun','0')|int == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="text-light d-block">Menor - ${{ precios['menor'] }}</label>
+                  <select name="menor" class="form-select">
+                    {% for n in range(0,6) %}
+                    <option value="{{ n }}" {% if request.query_params.get('menor','0')|int == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="text-light d-block">Jubilado - ${{ precios['jubilado'] }}</label>
+                  <select name="jubilado" class="form-select">
+                    {% for n in range(0,6) %}
+                    <option value="{{ n }}" {% if request.query_params.get('jubilado','0')|int == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Continuar</button>
+              </div>
+              {% endif %}
+            </form>
+            {% else %}
+            <p class="text-light mt-4">
+              No hay funciones disponibles para esta película.
+            </p>
+            {% endif %}
+          </div>
         </div>
       </div>
     </main>

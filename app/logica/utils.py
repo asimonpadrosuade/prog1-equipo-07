@@ -4,37 +4,28 @@ from app.logica.helpers import (
     horario_en_minutos,
     sacar_hora_horario,
 )
-from app.logica.json_access import (
-    cargar_peliculas,
-    cargar_funciones,
-    cargar_salas,
-    guardar_funciones,
-)
+from app.logica.json_access import cargar_json, guardar_json
 
 
+# Buscar peliculas
 def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
-    peliculas = cargar_peliculas()
-    funciones = cargar_funciones()
+    peliculas = cargar_json("peliculas.json")
+    funciones = cargar_json("funciones.json")
     con_funcion = {int(f["pelicula_id"]) for f in funciones.values()}
     resultados = [p for p in peliculas if int(p["id"]) in con_funcion]
 
     if busqueda:
         b = limpiar_texto(busqueda)
-        filtrados = []
-        for p in resultados:
-            if b in limpiar_texto(p["titulo"]):
-                filtrados.append(p)
-        resultados = filtrados
+        resultados = list(filter(lambda p: b in limpiar_texto(p["titulo"]), resultados))
+
 
     if categoria:
         cat = limpiar_texto(categoria)
-        filtrados = []
-        for p in resultados:
-            for c in p["categoria"]:
-                if cat in limpiar_texto(str(c)):
-                    filtrados.append(p)
-                    break
-        resultados = filtrados
+        resultados = [
+            p for p in resultados
+            if any(cat in limpiar_texto(str(c)) for c in p["categoria"])
+     ]
+
 
     if duracion:
 
@@ -51,9 +42,10 @@ def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
     return resultados
 
 
+# Agregar funcion admin
 def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
-    funciones = cargar_funciones()
-    salas = cargar_salas()
+    funciones = cargar_json("funciones.json")
+    salas = cargar_json("salas.json")
     if not comprobar_funciones(int(pelicula_id), sala, fecha, hora):
         return
     filas = salas[sala]["filas"]
@@ -67,12 +59,13 @@ def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
         "idioma": idioma,
         "asientos": [[0] * columnas for _ in range(filas)],
     }
-    guardar_funciones(funciones)
+    guardar_json(funciones, "funciones.json")
 
 
+# Comprobar conflictos de funciones
 def comprobar_funciones(pelicula_id, sala, fecha, hora):
-    peliculas = cargar_peliculas()
-    funciones = cargar_funciones()
+    peliculas = cargar_json("peliculas.json")
+    funciones = cargar_json("funciones.json")
     pelicula = None
     for p in peliculas:
         if int(p["id"]) == int(pelicula_id):
@@ -100,46 +93,50 @@ def comprobar_funciones(pelicula_id, sala, fecha, hora):
                 minutos_existente = horario_en_minutos(f["hora"])
                 duracion_existente = duracion_en_minutos(pelicula_existente["duracion"])
                 fin_funcion_existente = minutos_existente + duracion_existente
-                if not (fin_funcion_nueva <= minutos_existente or fin_funcion_existente <= minutos_nueva):
+                if not (
+                    fin_funcion_nueva <= minutos_existente
+                    or fin_funcion_existente <= minutos_nueva
+                ):
                     print(f"Conflicto con función que termina a las {f['hora']}.")
                     return False
     return True
 
 
+# Encontrar funciones por id de pelicula
 def encontrar_funciones(pelicula_id):
-    funciones = cargar_funciones()
-    lista = []
-    for fid, f in funciones.items():
-        if int(f["pelicula_id"]) == int(pelicula_id):
-            lista.append({"id": fid, **f})
-    return lista
+    funciones = cargar_json("funciones.json")
+    return [
+        {"id": fid, **f}
+        for fid, f in funciones.items()
+        if int(f["pelicula_id"]) == int(pelicula_id)
+    ]
 
-
+# Encontrar pelicula por id
 def encontrar_peliculas(pid):
-    peliculas = cargar_peliculas()
+    peliculas = cargar_json("peliculas.json")
     for p in peliculas:
         if int(p["id"]) == int(pid):
             return p
     return None
 
-
+# Mostrar valores de funciones
 def obtener_funciones(funciones, fecha=None, idioma=None):
-    fechas = []
-    idiomas = []
-    horarios = []
-    for f in funciones:
-        if f["fecha"] not in fechas:
-            fechas.append(f["fecha"])
+    fechas = {f["fecha"] for f in funciones}
+
     if fecha:
-        for f in funciones:
-            if f["fecha"] == fecha and f["idioma"] not in idiomas:
-                idiomas.append(f["idioma"])
+        filtradas_fecha = filter(lambda f: f["fecha"] == fecha, funciones)
+        idiomas = {f["idioma"] for f in filtradas_fecha}
+    else:
+        idiomas = {f["idioma"] for f in funciones}
+
     if fecha and idioma:
-        for f in funciones:
-            if (
-                f["fecha"] == fecha
-                and f["idioma"] == idioma
-                and f["hora"] not in horarios
-            ):
-                horarios.append(f["hora"])
-    return fechas, idiomas, horarios
+        filtradas = filter(
+            lambda f: f["fecha"] == fecha and f["idioma"] == idioma,
+            funciones
+        )
+        horarios = {f["hora"] for f in filtradas}
+    else:
+        horarios = set()
+
+    return list(fechas), list(idiomas), list(horarios)
+
