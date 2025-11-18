@@ -42,7 +42,7 @@ def busqueda(
 # Detalle de pelicula
 @app.get("/pelicula/{pelicula_id}", response_class=HTMLResponse)
 def pelicula(request: Request, pelicula_id: int):
-    pelicula = encontrar_peliculas(pelicula_id)
+    pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
     funciones = encontrar_funciones(pelicula_id)
     precios = cargar_json("precios.json")
 

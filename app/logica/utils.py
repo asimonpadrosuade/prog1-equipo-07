@@ -66,10 +66,14 @@ def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
 def comprobar_funciones(pelicula_id, sala, fecha, hora):
     peliculas = cargar_json("peliculas.json")
     funciones = cargar_json("funciones.json")
-    pelicula = None
-    for p in peliculas:
-        if int(p["id"]) == int(pelicula_id):
-            pelicula = p
+
+    def buscar_pelicula(pid):
+        for p in peliculas:
+            if int(p["id"]) == int(pid):
+                return p
+        return None
+
+    pelicula = buscar_pelicula(pelicula_id)
     if pelicula is None:
         print("Película no encontrada.")
         return False
@@ -84,23 +88,25 @@ def comprobar_funciones(pelicula_id, sala, fecha, hora):
         return False
 
     for f in funciones.values():
-        if f["sala"] == sala and f["fecha"] == fecha:
-            pelicula_existente = None
-            for p in peliculas:
-                if int(p["id"]) == int(f["pelicula_id"]):
-                    pelicula_existente = p
-            if pelicula_existente is not None:
-                minutos_existente = horario_en_minutos(f["hora"])
-                duracion_existente = duracion_en_minutos(pelicula_existente["duracion"])
-                fin_funcion_existente = minutos_existente + duracion_existente
-                if not (
-                    fin_funcion_nueva <= minutos_existente
-                    or fin_funcion_existente <= minutos_nueva
-                ):
-                    print(f"Conflicto con función que termina a las {f['hora']}.")
-                    return False
-    return True
 
+        if f["sala"] == sala and f["fecha"] == fecha:
+
+            pelicula_existente = buscar_pelicula(f["pelicula_id"])
+            if pelicula_existente is None:
+                continue
+
+            minutos_existente = horario_en_minutos(f["hora"])
+            duracion_existente = duracion_en_minutos(pelicula_existente["duracion"])
+            fin_funcion_existente = minutos_existente + duracion_existente
+
+            if not (
+                fin_funcion_nueva <= minutos_existente
+                or fin_funcion_existente <= minutos_nueva
+            ):
+                print(f"Conflicto con función que termina a las {f['hora']}.")
+                return False
+
+    return True
 
 # Encontrar funciones por id de pelicula
 def encontrar_funciones(pelicula_id):
@@ -112,9 +118,8 @@ def encontrar_funciones(pelicula_id):
     ]
 
 # Encontrar pelicula por id
-def encontrar_peliculas(pid):
-    peliculas = cargar_json("peliculas.json")
-    for p in peliculas:
+def encontrar_peliculas(lista, pid):
+    for p in lista:
         if int(p["id"]) == int(pid):
             return p
     return None
