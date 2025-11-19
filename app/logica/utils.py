@@ -145,3 +145,63 @@ def obtener_funciones(funciones, fecha=None, idioma=None):
 
     return list(fechas), list(idiomas), list(horarios)
 
+<<<<<<< HEAD
+# Butacas
+
+
+from pathlib import Path
+import json
+
+salas_ruta = Path("app/data/salas.json")
+
+
+def cargar_salas():
+    with open(salas_ruta, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def obtener_o_crear_butacas_por_funcion(funcion: dict, salas: dict) -> list[list[int]]:
+    sala_id = funcion.get("sala")
+
+    if sala_id is None:
+        raise ValueError("La función seleccionada no tiene sala asignada")
+
+    sala_cfg = salas.get(sala_id)
+    if sala_cfg is None:
+        raise ValueError(f"Sala '{sala_id}' no definida en salas.json")
+
+    filas = sala_cfg["filas"]
+    columnas = sala_cfg["columnas"]
+
+    
+    if not funcion.get("asientos"):
+        funcion["asientos"] = [[0 for _ in range(columnas)] for _ in range(filas)]
+
+    return funcion["asientos"]
+
+
+def reservar_butaca_funcion(funciones, funcion_id, fila, columna):
+    salas = cargar_salas()
+    funcion = funciones.get(str(funcion_id))
+
+    if not funcion:
+        return {"ok": False, "msg": "La función no existe"}
+
+    asientos = obtener_o_crear_butacas_por_funcion(funcion, salas)
+
+    f_idx = fila - 1
+    c_idx = columna - 1
+
+    
+    if f_idx < 0 or c_idx < 0 or f_idx >= len(asientos) or c_idx >= len(asientos[0]):
+        return {"ok": False, "msg": "La butaca no existe en esta sala"}
+
+    # Ocupada
+    if asientos[f_idx][c_idx] == 1:
+        return {"ok": False, "msg": "La butaca ya está ocupada"}
+
+    # Reservar
+    asientos[f_idx][c_idx] = 1
+    return {"ok": True, "msg": "Reserva exitosa"}
+=======
+>>>>>>> 7bc56f05cd185530bee17afeb281c6921802c2af
