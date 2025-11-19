@@ -1,6 +1,8 @@
 import json
 import bcrypt
 from pathlib import Path
+from app.logica.json_access import cargar_json
+
 
 # Cargar peliculas
 peliculas_ruta = Path("app/data/peliculas.json")
@@ -96,7 +98,7 @@ def buscar_peliculas(
 ):
     funciones = cargar_funciones()
 
-    resultados = [{**pelicula, "id": id} for id, pelicula in peliculas.items()]
+    resultados = [{**pelicula, "id": i} for i, pelicula in enumerate(peliculas)]
     peliculas_con_funcion = {f["pelicula_id"] for f in funciones.values()}
     resultados = [
         pelicula

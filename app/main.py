@@ -3,12 +3,14 @@ from fastapi import FastAPI, Request, Query, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 from app.logica.utils import (
     buscar_peliculas,
     encontrar_peliculas,
     encontrar_funciones,
     obtener_funciones,
-    peliculas
+    peliculas,
+    agregar_funcion, 
 )
 from app.logica.auth import comprobar_admin, verificar_usuario
 from app.logica.json_access import cargar_json
@@ -44,13 +46,15 @@ def busqueda(
 def pelicula(request: Request, pelicula_id: int):
     pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
     funciones = encontrar_funciones(pelicula_id)
-    precios = cargar_json("precios.json")
+    precios = cargar_json("precios.json") 
 
     fecha_selected = request.query_params.get("fecha")
     idioma_selected = request.query_params.get("idioma")
     hora_selected = request.query_params.get("hora")
 
-    fechas, idiomas, horarios = obtener_funciones(funciones, fecha_selected, idioma_selected)
+    fechas, idiomas, horarios = obtener_funciones(
+        funciones, fecha_selected, idioma_selected
+    )
 
     return templates.TemplateResponse(
         "public/peliculas.html",
@@ -63,12 +67,45 @@ def pelicula(request: Request, pelicula_id: int):
             "horarios": horarios,
             "fecha_selected": fecha_selected,
             "idioma_selected": idioma_selected,
+            "hora_selected": hora_selected,
+            "precios": precios,  
+        },
+    )
+
+
+@app.get("/pago", response_class=HTMLResponse)
+def pago(
+    request: Request,
+    comun: int = Query(0),
+    menor_jubilado: int = Query(0),
+    movistar: int = Query(0),
+):
+    precios = cargar_json("precios.json")
+    total = (
+        comun * precios["comun"]
+        + menor_jubilado * precios["menor_jubilado"]
+        + movistar * precios["movistar"]
+    )
+    return templates.TemplateResponse(
+        "public/pago.html",
+        {
+            "request": request,
+            "cant_comun": comun,
+            "cant_menor_jubilado": menor_jubilado,
+            "cant_movistar": movistar,
+            "total": total,
+            "precios": precios,
         },
     )
 
 
 # Seleccion de asientos
 @app.get("/asientos/{funcion_id}", response_class=HTMLResponse)
+def asientos(request: Request, funcion_id: str):
+    return templates.TemplateResponse(
+        "public/asientos.html",
+        {"request": request, "funcion_id": funcion_id},
+    )
 
 
 # Panel de admin
@@ -85,8 +122,13 @@ def form_funcion(request: Request):
         return RedirectResponse("/login")
     return templates.TemplateResponse(
         "admin/funcion.html",
-        {"request": request, "peliculas": cargar_json("peliculas.json"), "salas": cargar_json("salas.json")},
+        {
+            "request": request,
+            "peliculas": cargar_json("peliculas.json"),
+            "salas": cargar_json("salas.json"),
+        },
     )
+
 
 @app.post("/admin/funcion")
 def crear_funcion(
@@ -101,6 +143,7 @@ def crear_funcion(
         return RedirectResponse("/login")
     agregar_funcion(pelicula_id, sala, fecha, hora, idioma)
     return RedirectResponse("/admin", status_code=302)
+
 
 # Login y logout
 @app.get("/login", response_class=HTMLResponse)
@@ -124,6 +167,7 @@ def logout():
     r = RedirectResponse("/", status_code=302)
     r.delete_cookie("admin")
     return r
+
 
 # Correr app
 if __name__ == "__main__":
