@@ -1,0 +1,73 @@
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title> Resumen de compra </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles/all.css" />
+    <link rel="stylesheet" href="/static/styles/peliculas.css" />
+  </head>
+  <body class="mx-lg-5 mx-md-2 mx-sm-0">
+    <header>
+      <div class="container-fluid px-0">
+        <div class="row align-items-center">
+          <div class="col-6">
+            <h1 class="title mb-0">PyTicket</h1>
+          </div>
+          <div class="col-6 text-end">
+            <a href="/" class="btn btn-outline-danger">Cancelar</a>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="main-container row g-5 px-sm-5 px-3 align-items-stretch">
+        <div class="col-12 col-lg-6 order-2 order-lg-1">
+          <div class="card bg-dark h-100 shadow-sm">
+            <div class="card-body p-4 text-light">
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-6 order-1 order-lg-2">
+          <div class="card bg-dark h-100 shadow-sm">
+            <div class="card-body p-4 text-light">
+              <h2 class="h4 mb-3">Resumen de compra</h2>
+
+              <div class="mb-2"><strong>Orden:</strong> {{ orden.orden_id }}</div>
+              <div class="mb-2"><strong>Función:</strong> {{ orden.funcion_id }}</div>
+              <div class="mb-2"><strong>Fecha y hora:</strong> {{ orden.fecha }} {{ orden.horario }}</div>
+
+              <h3 class="h6 mt-3">Entradas</h3>
+              <ul class="list-unstyled mb-2">
+                <li>Estandar: {{ orden.entradas_estandar }}</li>
+                <li>Menor: {{ orden.entradas_menor }}</li>
+                <li>Jubilado: {{ orden.entradas_jubilado }}</li>
+              </ul>
+
+              <div class="mb-2">
+                <strong>Asientos:</strong>
+                {% for a in orden.asientos %}
+                  <span class="badge text-bg-secondary me-1">{{ a }}</span>
+                {% endfor %}
+              </div>
+
+              <div class="fs-5 mt-3">
+                <strong>Total:</strong> $ {{ '%.2f'|format(orden.total) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "1":{
+    "orden_id": 1,
+    "funcion_id": 3,
+    "entradas_menor": 2,
+    "entradas_jubilado": 0,
+    "entradas_estandar": 1,
+    "asientos": ["A1", "A2", "A3"],
+    "total": 30000.0
+  },
+  "2": {
+    "orden_id": 2,
+    "funcion_id": 5,
+    "entradas_menor": 0,
+    "entradas_jubilado": 0,
+    "entradas_estandar": 2,
+    "asientos": ["B4", "B5"],
+    "total": 20000.0
+  }
+}
