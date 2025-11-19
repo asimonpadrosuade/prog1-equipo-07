@@ -1,124 +1,151 @@
-import json
-from pathlib import Path
-import string
-import unicodedata
-from datetime import datetime
+from app.logica.helpers import (
+    limpiar_texto,
+    duracion_en_minutos,
+    horario_en_minutos,
+    sacar_hora_horario,
+)
+from app.logica.json_access import cargar_json, guardar_json
 
-# Cargar peliculas
-peliculas_ruta = Path("app/data/peliculas.json")
-def cargar_peliculas():
-    with open(peliculas_ruta, encoding="utf-8") as f:
-        return json.load(f)
 
-#Cargar funciones
-funciones_ruta = Path("app/data/funciones.json")
-def cargar_funciones():
-    with open(funciones_ruta, encoding="utf-8") as f:
-        return json.load(f)
-    
-#Guardar funciones
-def guardar_funciones(funciones):
-    with open(funciones_ruta, "w", encoding="utf-8") as f:
-        json.dump(funciones, f, ensure_ascii=False, indent=2)
+# Buscar peliculas
+def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
+    peliculas = cargar_json("peliculas.json")
+    funciones = cargar_json("funciones.json")
+    con_funcion = {int(f["pelicula_id"]) for f in funciones.values()}
+    resultados = [p for p in peliculas if int(p["id"]) in con_funcion]
 
-peliculas = cargar_peliculas()
-
-# Mostrar peliculas
-def encontrar_peliculas(id: int):
-    pelicula = peliculas.get(str(id))
-    if pelicula:
-        pelicula_con_id = dict(pelicula)
-        pelicula_con_id["id"] = id
-        return pelicula_con_id
-    return None
-
-# Filtros de peliculas
-def buscar_peliculas(
-    busqueda: str | None, categoria: str | None = None, duracion: str | None = None
-):
-    
-    resultados=[]
-    resultados = [{**pelicula, "id": id} for id, pelicula in peliculas.items()]
-
+    if busqueda:
+        b = limpiar_texto(busqueda)
+        resultados = list(filter(lambda p: b in limpiar_texto(p["titulo"]), resultados))
 
 
     if categoria:
-        categoria_filtrada = quitar_tildes(categoria.lower())
+        cat = limpiar_texto(categoria)
         resultados = [
-            pelicula
-            for pelicula in resultados
-            if categoria_filtrada in quitar_tildes(str(pelicula["categoria"]).lower())
-        ]
+            p for p in resultados
+            if any(cat in limpiar_texto(str(c)) for c in p["categoria"])
+     ]
+
 
     if duracion:
 
-        def duracion_en_minutos(d: str) -> int:
-            horas, minutos = d.split("h ")
-            minutos = minutos.replace("m", "")
-            return int(horas) * 60 + int(minutos)
+        def mins(p):
+            return duracion_en_minutos(p["duracion"])
 
         if duracion == "corta":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) < 100
-            ]
+            resultados = [p for p in resultados if mins(p) < 100]
         elif duracion == "media":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if 100 <= duracion_en_minutos(pelicula["duracion"]) <= 150
-            ]
+            resultados = [p for p in resultados if 100 <= mins(p) <= 150]
         elif duracion == "larga":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) > 150
-            ]
+            resultados = [p for p in resultados if mins(p) > 150]
 
     return resultados
 
-# Normalizar texto quitando tildes
-def quitar_tildes(texto: str) -> str:
-    texto_normalizado = unicodedata.normalize("NFD", texto)
-    texto_sin_tildes = "".join(
-        c for c in texto_normalizado if unicodedata.category(c) != "Mn"
-    )
-    return texto_sin_tildes
 
-# Normalizar texto quitando signo de puntuación y demas
-def quitar_punt(texto: str) -> str:
-    return texto.translate(str.maketrans('', '', string.punctuation))
-
-
-# Precios
-def precio_por_estreno(fecha_lanzamiento):
-    precio_estandar = 7999
-    precio_estreno = precio_estandar * 1.35
-    hoy = datetime.now()
-    dias_estreno = (hoy - fecha_lanzamiento).days
-    return precio_estandar if dias_estreno >= 7 else precio_estreno
-
-
-def formatear_moneda(valor):
-    entero, dec = f"{valor:,.2f}".split(".")
-    return f"$ {entero.replace(',', '.')},{dec}"
+# Agregar funcion admin
+def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
+    funciones = cargar_json("funciones.json")
+    salas = cargar_json("salas.json")
+    if not comprobar_funciones(int(pelicula_id), sala, fecha, hora):
+        return
+    filas = salas[sala]["filas"]
+    columnas = salas[sala]["columnas"]
+    nueva_id = str(len(funciones) + 1)
+    funciones[nueva_id] = {
+        "pelicula_id": int(pelicula_id),
+        "sala": sala,
+        "fecha": fecha,
+        "hora": hora,
+        "idioma": idioma,
+        "asientos": [[0] * columnas for _ in range(filas)],
+    }
+    guardar_json(funciones, "funciones.json")
 
 
-def precio_por_perfil(edad, movistar):
-    precio_estandar = 7999
-    precio_movistar = 7500
-    precio_reducido = 6999
-    if edad > 65:
-        return "Jubilado", formatear_moneda(precio_reducido)
-    elif edad < 6:
-        return "Menor", formatear_moneda(precio_reducido)
-    elif movistar == 1:
-        return "Movistar", formatear_moneda(precio_movistar)
+# Comprobar conflictos de funciones
+def comprobar_funciones(pelicula_id, sala, fecha, hora):
+    peliculas = cargar_json("peliculas.json")
+    funciones = cargar_json("funciones.json")
+
+    def buscar_pelicula(pid):
+        for p in peliculas:
+            if int(p["id"]) == int(pid):
+                return p
+        return None
+
+    pelicula = buscar_pelicula(pelicula_id)
+    if pelicula is None:
+        print("Película no encontrada.")
+        return False
+
+    duracion_total = duracion_en_minutos(pelicula["duracion"])
+    minutos_nueva = horario_en_minutos(hora)
+    fin_funcion_nueva = minutos_nueva + duracion_total
+    h = sacar_hora_horario(hora)
+
+    if 2 <= h < 16:
+        print("No se pueden agendar funciones entre las 02:00 y las 16:00.")
+        return False
+
+    for f in funciones.values():
+
+        if f["sala"] == sala and f["fecha"] == fecha:
+
+            pelicula_existente = buscar_pelicula(f["pelicula_id"])
+            if pelicula_existente is None:
+                continue
+
+            minutos_existente = horario_en_minutos(f["hora"])
+            duracion_existente = duracion_en_minutos(pelicula_existente["duracion"])
+            fin_funcion_existente = minutos_existente + duracion_existente
+
+            if not (
+                fin_funcion_nueva <= minutos_existente
+                or fin_funcion_existente <= minutos_nueva
+            ):
+                print(f"Conflicto con función que termina a las {f['hora']}.")
+                return False
+
+    return True
+
+# Encontrar funciones por id de pelicula
+def encontrar_funciones(pelicula_id):
+    funciones = cargar_json("funciones.json")
+    return [
+        {"id": fid, **f}
+        for fid, f in funciones.items()
+        if int(f["pelicula_id"]) == int(pelicula_id)
+    ]
+
+# Encontrar pelicula por id
+def encontrar_peliculas(lista, pid):
+    for p in lista:
+        if int(p["id"]) == int(pid):
+            return p
+    return None
+
+# Mostrar valores de funciones
+def obtener_funciones(funciones, fecha=None, idioma=None):
+    fechas = {f["fecha"] for f in funciones}
+
+    if fecha:
+        filtradas_fecha = filter(lambda f: f["fecha"] == fecha, funciones)
+        idiomas = {f["idioma"] for f in filtradas_fecha}
     else:
-        return "Entrada", formatear_moneda(precio_estandar)
+        idiomas = {f["idioma"] for f in funciones}
 
+    if fecha and idioma:
+        filtradas = filter(
+            lambda f: f["fecha"] == fecha and f["idioma"] == idioma,
+            funciones
+        )
+        horarios = {f["hora"] for f in filtradas}
+    else:
+        horarios = set()
 
+    return list(fechas), list(idiomas), list(horarios)
+
+<<<<<<< HEAD
 # Butacas
 
 
@@ -176,3 +203,5 @@ def reservar_butaca_funcion(funciones, funcion_id, fila, columna):
     # Reservar
     asientos[f_idx][c_idx] = 1
     return {"ok": True, "msg": "Reserva exitosa"}
+=======
+>>>>>>> 7bc56f05cd185530bee17afeb281c6921802c2af

@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>{{ pelicula.titulo }}</title>
+    <title>PyTicket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,30 +15,15 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/styles/all.css" />
-    <link rel="stylesheet" href="/static/styles/peliculas.css" />
+    <link rel="stylesheet" href="/static/styles/.css" />
   </head>
   <body class="mx-lg-5 mx-md-2 mx-sm-0">
     <header>
       <h1 class="title">PyTicket</h1>
     </header>
     <main>
-      <div class="main-container row g-5 px-sm-5 px-3">
-        <div class="poster-container col-4">
-          <img
-            src="/static/imagenes/posters/p{{ pelicula.id }}.webp"
-            alt="Poster de {{ pelicula.titulo }}"
-            class="img-fluid rounded-4 w-100"
-          />
-          <p></p>
-        </div>
-        <div class="info-container col-8">
-          <div class="texto-container d-flex gap-3 flex-column">
-            <h1 class="titulo-pelicula text-light display-3">{{ pelicula.titulo }}</h1>
-            <p class="descripcion text-light fs-5">{{ pelicula.sinopsis }}</p>
-          </div>
-          <div class="categorias-container"></div>
-        </div>
-      </div>
+      <h2>Panel de Administración</h2>
+      <a href="/admin/funcion">Agregar funcion</a>
     </main>
     <footer></footer>
   </body>
