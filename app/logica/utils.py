@@ -117,7 +117,7 @@ def mostrar_funciones(pelicula_id):
     ]
 
 # Encontrar funciones por filtros
-def encontrar_funciones(pelicula_id, fecha=None, idioma=None, hora=None):
+def encontrar_funciones_filtros(pelicula_id, fecha=None, idioma=None, hora=None):
     funciones = mostrar_funciones(pelicula_id)
 
     if fecha:
@@ -128,6 +128,11 @@ def encontrar_funciones(pelicula_id, fecha=None, idioma=None, hora=None):
         funciones = [f for f in funciones if f["hora"] == hora]
 
     return funciones
+
+# Encontrar funciones por id
+def encontrar_funciones(funcion_id):
+    funciones = cargar_json("funciones.json")
+    return funciones[str(funcion_id)]
 
 # Encontrar pelicula por id
 def encontrar_peliculas(lista, pid):
@@ -167,12 +172,27 @@ def calcular_total(comun, menor, jubilado):
     )
     return total
 
-# Crear orden de compra
-def crear_orden():
-    orden_id = len(cargar_json("ordenes.json")) + 1
-    return orden_id
+# Asientos
+def mostrar_asientos(funcion_id):
+    funciones = cargar_json("funciones.json")
+    f = funciones[str(funcion_id)]
+    matriz = f["asientos"]
+    return matriz
 
-# Cargar orden de compra
-def cargar_orden(orden_id):
+def cant_entradas(comun, menor, jubilado):
+    return int(comun or 0) + int(menor or 0) + int(jubilado or 0)
+
+# Orden de compra
+def crear_orden(reserva, asientos):
     ordenes = cargar_json("ordenes.json")
-    return ordenes.get(str(orden_id), None)
+    ordenes[len(ordenes)+1] = {
+        "funcion_id": reserva["funcion_id"],
+        "entradas": reserva["entradas"],
+        "asientos": asientos,
+        "total": reserva["total"],
+    }
+    guardar_json(ordenes, "ordenes.json")
+
+def mostrar_orden(orden_id):
+    ordenes = cargar_json("ordenes.json")
+    return ordenes[orden_id]

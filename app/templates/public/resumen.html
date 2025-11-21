@@ -39,23 +39,21 @@
         </div>
         <div class="col-12 col-lg-6 order-1 order-lg-2">
           <div class="card bg-dark h-100 shadow-sm">
-            <div class="card-body p-4 text-light">
+            <div class="card-body p-4 d-flex flex-column gap-3 text-light">
               <h2 class="h4 mb-3">Resumen de compra</h2>
-
-              <div class="mb-2"><strong>Orden:</strong> {{ orden.orden_id }}</div>
-              <div class="mb-2"><strong>Función:</strong> {{ orden.funcion_id }}</div>
-              <div class="mb-2"><strong>Fecha y hora:</strong> {{ orden.fecha }} {{ orden.horario }}</div>
-
-              <h3 class="h6 mt-3">Entradas</h3>
-              <ul class="list-unstyled mb-2">
-                <li>Estandar: {{ orden.entradas_estandar }}</li>
-                <li>Menor: {{ orden.entradas_menor }}</li>
-                <li>Jubilado: {{ orden.entradas_jubilado }}</li>
+              <div class="mb-2 d-flex flex-column"><strong>Fecha y hora:</strong> {{ funcion.fecha }} {{ funcion.hora }}</div>
+              <div>
+              <strong class="mt-3">Entradas:</strong>
+              <ul class="list-unstyled mb-2 d-flex gap-2">
+                <li>Estandar: {{ orden.entradas.comun }}</li>
+                <li>Menor: {{ orden.entradas.menor }}</li>
+                <li>Jubilado: {{ orden.entradas.jubilado }}</li>
               </ul>
+              </div>
 
               <div class="mb-2">
                 <strong>Asientos:</strong>
-                {% for a in orden.asientos %}
+                {% for a in asientos %}
                   <span class="badge text-bg-secondary me-1">{{ a }}</span>
                 {% endfor %}
               </div>
