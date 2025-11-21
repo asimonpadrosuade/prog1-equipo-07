@@ -2,26 +2,55 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>PyTicket</title>
+    <title>Selección de Asientos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles/all.css" />
+    <link rel="stylesheet" href="/static/styles/asientos.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/static/styles/all.css" />
-    <link rel="stylesheet" href="/static/styles/asientos.css" />
   </head>
   <body class="mx-lg-5 mx-md-2 mx-sm-0">
-    <header>
-      <h1 class="title">PyTicket</h1>
-    </header>
-    <main>
+    <header><h1 class="title">PyTicket</h1></header>
+    <main class="container my-4">
+      <h2 class="text-light mb-3">Selecciona tus asientos</h2>
+      <div>
+            <p class="text-light">Total de entradas: {{ total }}</p>
+          </div>
+
+      <form method="post" action="/asientos">
+        <input type="hidden" name="reserva_id" value="{{ reserva_id }}">
+        <div class="asientos-container">
+            {% for row in sala %}
+              {% set row_index = loop.index0 %}
+              <div class="row justify-content-center mb-2">
+                {% for seat in row %}
+                  {% if seat == 0 %}
+                  <div class="col-auto">
+                      <label class="asiento asiento-libre">
+                        <input type="checkbox" name="asientos" value="{{ row_index }}-{{ loop.index0 }}">
+                        <span class="checkmark"></span>
+                      </label>
+                  </div>
+                  {% else %}
+                  <div class="col-auto">
+                      <label class="asiento asiento-ocupado">
+                        <input type="checkbox">
+                        <span class="checkmark"></span>
+                      </label>
+                  </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <button type="submit" class="btn btn-primary">Continuar</button>
+        </div>
+      </form>
     </main>
   </body>
 </html>
