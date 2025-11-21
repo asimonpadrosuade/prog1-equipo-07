@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request, Query, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 from app.logica.utils import (
     buscar_peliculas,
     calcular_total,

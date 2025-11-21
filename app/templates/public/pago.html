@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pagos - PyTicket</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles/all.css" />
+  </head>
+
+  <body class="mx-lg-5 mx-md-2 mx-sm-0" style="background: var(--primaryColor);">
+    <header class="mb-4">
+      <h1 class="title mb-0">PyTicket</h1>
+      <p class="text-light mt-1">Pagos</p>
+    </header>
+
+    <main class="container">
+
+      <!-- RESUMEN DE ENTRADAS -->
+      <section class="mb-4 p-4 rounded"
+               style="background: var(--quaternaryColor); border:1px solid #333;">
+        <h4 class="text-light mb-3">Resumen de tu compra</h4>
+
+        <ul class="list-unstyled text-light mb-3">
+          {% if cant_comun and cant_comun > 0 %}
+            <li>
+              Entrada común (x{{ cant_comun }}) -
+              ${{ precios.comun * cant_comun }}
+            </li>
+          {% endif %}
+
+          {% if cant_menor_jubilado and cant_menor_jubilado > 0 %}
+            <li>
+              Menor / Jubilado (x{{ cant_menor_jubilado }}) -
+              ${{ precios.menor_jubilado * cant_menor_jubilado }}
+            </li>
+          {% endif %}
+
+          {% if cant_movistar and cant_movistar > 0 %}
+            <li>
+              Movistar (x{{ cant_movistar }}) -
+              ${{ precios.movistar * cant_movistar }}
+            </li>
+          {% endif %}
+        </ul>
+
+        <hr class="border-secondary" />
+
+        <p class="text-light fs-5 mb-0">
+          Total a pagar:
+          <strong>${{ total }}</strong>
+        </p>
+      </section>
+
+      <!-- FORMULARIO TARJETA -->
+      <section class="p-4 rounded mb-5"
+               style="background: var(--quaternaryColor); border:1px solid #333;">
+        <h4 class="text-light mb-3">Datos de la tarjeta</h4>
+
+        <form>
+          <div class="mb-3">
+            <label class="form-label text-light">Nombre y apellido</label>
+            <input type="text" class="form-control" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Número de tarjeta</label>
+            <input type="text" class="form-control" />
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-light">Vencimiento (MM/AA)</label>
+              <input type="text" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-light">CVV</label>
+              <input type="text" class="form-control" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">DNI del titular</label>
+            <input type="text" class="form-control" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Total a pagar</label>
+            <input
+              type="text"
+              class="form-control"
+              value="${{ total }}"
+              readonly
+            />
+          </div>
+
+          <button type="submit" class="btn btn-success w-100 mt-3">
+            Confirmar pago
+          </button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

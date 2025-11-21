@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -151,7 +151,24 @@
           </div>
         </div>
       </div>
-    </main>
-    <footer></footer>
-  </body>
+    </div>
+    </div>
+  </main>
+
+  <footer></footer>
+
+  <script>
+    function mostrarEntradas() {
+      const selectHora = document.getElementById("hora");
+      const box = document.getElementById("entradas-box");
+      if (!selectHora || !box) return;
+      if (selectHora.value !== "") {
+        box.style.display = "block";
+      } else {
+        box.style.display = "none";
+      }
+    }
+  </script>
+</body>
+
 </html>
