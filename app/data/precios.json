@@ -1,5 +1,5 @@
 {
   "comun": 15000,
-  "menor_jubilado": 10000,
-  "movistar": 15000
+  "menor": 10000,
+  "jubilado": 10000
 }

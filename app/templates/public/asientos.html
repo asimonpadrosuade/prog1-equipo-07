@@ -24,13 +24,13 @@
         <input type="hidden" name="reserva_id" value="{{ reserva_id }}">
         <div class="asientos-container">
             {% for row in sala %}
-              {% set row_index = loop.index0 %}
+              {% set row_index = loop.index0 + 1 %}
               <div class="row justify-content-center mb-2">
                 {% for seat in row %}
                   {% if seat == 0 %}
                   <div class="col-auto">
                       <label class="asiento asiento-libre">
-                        <input type="checkbox" name="asientos" value="{{ row_index }}-{{ loop.index0 }}">
+                        <input type="checkbox" name="asientos" value="{{ row_index }}-{{ loop.index0 + 1 }}">
                         <span class="checkmark"></span>
                       </label>
                   </div>

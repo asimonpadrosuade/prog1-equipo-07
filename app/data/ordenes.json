@@ -1,0 +1,41 @@
+{
+    "1": {
+        "funcion_id": "6",
+        "entradas": {
+            "comun": 2,
+            "menor": 0,
+            "jubilado": 0
+        },
+        "asientos": [
+            "4-5",
+            "4-6"
+        ],
+        "total": 30000
+    },
+    "2": {
+        "funcion_id": "6",
+        "entradas": {
+            "comun": 2,
+            "menor": 0,
+            "jubilado": 0
+        },
+        "asientos": [
+            "6-6",
+            "6-7"
+        ],
+        "total": 30000
+    },
+    "3": {
+        "funcion_id": "5",
+        "entradas": {
+            "comun": 0,
+            "menor": 2,
+            "jubilado": 0
+        },
+        "asientos": [
+            "4-6",
+            "4-7"
+        ],
+        "total": 20000
+    }
+}

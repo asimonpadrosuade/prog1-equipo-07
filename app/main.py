@@ -4,7 +4,6 @@ from fastapi import FastAPI, Request, Query, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
 from app.logica.utils import (
     buscar_peliculas,
     calcular_total,
@@ -17,6 +16,7 @@ from app.logica.utils import (
     mostrar_asientos,
     crear_orden,
     encontrar_funciones,
+    mostrar_orden,
 )
 from app.logica.json_access import cargar_json
 
@@ -155,12 +155,15 @@ def recibir_asientos(
     reserva_id: str = Form(...),
     asientos: list[str] = Form([]),
 ):
-    reserva = reserva_temp.get(reserva_id)
-    if not reserva:
+    try:
+        reserva = reserva_temp[reserva_id]
+    except KeyError:
         return RedirectResponse("/", status_code=303)
     max_sel = reserva["cantidad_entradas"]
     if len(asientos) != max_sel:
-        return RedirectResponse(f"/asientos/{reserva_id}?error=cantidad", status_code=303)
+        return RedirectResponse(
+            f"/asientos/{reserva_id}?error=cantidad", status_code=303
+        )
     asientos_temp[reserva_id] = asientos
     return RedirectResponse(f"/resumen/{reserva_id}", status_code=303)
 
@@ -172,11 +175,20 @@ def resumen(request: Request, reserva_id: str):
         reserva = reserva_temp[reserva_id]
         seleccion = asientos_temp[reserva_id]
         funcion = encontrar_funciones(reserva["funcion_id"])
+        pelicula = encontrar_peliculas(
+            cargar_json("peliculas.json"), funcion["pelicula_id"]
+        )
     except KeyError:
         return RedirectResponse("/", status_code=303)
     return templates.TemplateResponse(
         "public/resumen.html",
-        {"request": request, "orden": reserva, "asientos": seleccion, "funcion": funcion},
+        {
+            "request": request,
+            "orden": reserva,
+            "asientos": seleccion,
+            "funcion": funcion,
+            "pelicula": pelicula,
+        },
     )
 
 
@@ -184,13 +196,21 @@ def resumen(request: Request, reserva_id: str):
 def confirmar_orden(
     reserva_id: str,
 ):
-    reserva = reserva_temp.get(reserva_id)
-    if not reserva:
+    try:
+        reserva = reserva_temp[reserva_id]
+        asientos = asientos_temp[reserva_id]
+    except KeyError:
         return RedirectResponse("/", status_code=303)
+    orden_id = crear_orden(reserva, asientos)
+    return RedirectResponse(f"/exito/{orden_id}", status_code=303)
 
-    asientos = asientos_temp.get(reserva_id)
-    crear_orden(reserva, asientos)
-    return RedirectResponse(f"/resumen/{reserva_id}?confirmada=1", status_code=303)
+
+# Compra exitosa
+@app.get("/exito/{orden_id}", response_class=HTMLResponse)
+def exito(request: Request, orden_id: str):
+    return templates.TemplateResponse(
+        "public/exito.html", {"orden": mostrar_orden(orden_id), "request": request}
+    )
 
 
 # Panel de admin

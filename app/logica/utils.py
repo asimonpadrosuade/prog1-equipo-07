@@ -1,55 +1,48 @@
-import json
-import bcrypt
-from pathlib import Path
-from app.logica.json_access import cargar_json
+from app.logica.helpers import (
+    limpiar_texto,
+    duracion_en_minutos,
+    horario_en_minutos,
+    sacar_hora_horario,
+)
+from app.logica.json_access import cargar_json, guardar_json
 
 
-# Cargar peliculas
-peliculas_ruta = Path("app/data/peliculas.json")
+# Buscar peliculas
+def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
+    peliculas = cargar_json("peliculas.json")
+    funciones = cargar_json("funciones.json")
+    con_funcion = {int(f["pelicula_id"]) for f in funciones.values()}
+    resultados = [p for p in peliculas if int(p["id"]) in con_funcion]
+
+    if busqueda:
+        b = limpiar_texto(busqueda)
+        resultados = list(filter(lambda p: b in limpiar_texto(p["titulo"]), resultados))
 
 
-def cargar_peliculas():
-    with open(peliculas_ruta, encoding="utf-8") as f:
-        return json.load(f)
+    if categoria:
+        cat = limpiar_texto(categoria)
+        resultados = [
+            p for p in resultados
+            if any(cat in limpiar_texto(str(c)) for c in p["categoria"])
+     ]
 
 
-peliculas = cargar_peliculas()
+    if duracion:
 
-# Cargar usuarios
-usuarios_ruta = Path("app/data/usuarios.json")
+        def mins(p):
+            return duracion_en_minutos(p["duracion"])
 
+        if duracion == "corta":
+            resultados = [p for p in resultados if mins(p) < 100]
+        elif duracion == "media":
+            resultados = [p for p in resultados if 100 <= mins(p) <= 150]
+        elif duracion == "larga":
+            resultados = [p for p in resultados if mins(p) > 150]
 
-def cargar_usuarios():
-    with open(funciones_ruta, encoding="utf-8") as f:
-        return json.load(f)
-
-
-# Verificar usuario
-def verificar_usuario(username, password):
-    with open(usuarios_ruta, encoding="utf-8") as f:
-        usuarios = json.load(f)
-    user = usuarios.get(username)
-    if user and bcrypt.checkpw(password.encode(), user["password"].encode()):
-        return True
-    return False
+    return resultados
 
 
-# Cargar funciones
-funciones_ruta = Path("app/data/funciones.json")
-
-
-def cargar_funciones():
-    with open(funciones_ruta, encoding="utf-8") as f:
-        return json.load(f)
-
-
-# Guardar funciones
-def guardar_funciones(funciones):
-    with open(funciones_ruta, "w", encoding="utf-8") as f:
-        json.dump(funciones, f, ensure_ascii=False, indent=2)
-
-
-# Agregar funciones
+# Agregar funcion admin
 def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
     funciones = cargar_json("funciones.json")
     salas = cargar_json("salas.json")
@@ -64,15 +57,20 @@ def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
         "fecha": fecha,
         "hora": hora,
         "idioma": idioma,
-        "asientos": [[0 for _ in range(columnas)] for _ in range(filas)],
+        "asientos": [[0] * columnas for _ in range(filas)],
     }
-    guardar_funciones(funciones)
+    guardar_json(funciones, "funciones.json")
 
 # Comprobar conflictos al agregar funciones admin
 def comprobar_funciones(pelicula_id, sala, fecha, hora):
     peliculas = cargar_json("peliculas.json")
     funciones = cargar_json("funciones.json")
 
+    def buscar_pelicula(pid):
+        for p in peliculas:
+            if int(p["id"]) == int(pid):
+                return p
+        return None
 
     pelicula = buscar_pelicula(pelicula_id)
     if pelicula is None:
@@ -143,86 +141,26 @@ def encontrar_peliculas(lista, pid):
             return p
     return None
 
-
-# Filtros de peliculas
-def buscar_peliculas(
-    busqueda: str | None, categoria: str | None = None, duracion: str | None = None
-):
-    funciones = cargar_funciones()
-
-    resultados = [{**pelicula, "id": i} for i, pelicula in enumerate(peliculas)]
-    peliculas_con_funcion = {f["pelicula_id"] for f in funciones.values()}
-    resultados = [
-        pelicula
-        for pelicula in resultados
-        if str(pelicula["id"]) in peliculas_con_funcion
-    ]
-
-    if categoria:
-        categoria_filtrada = categoria.lower()
-        resultados = [
-            pelicula
-            for pelicula in resultados
-            if categoria_filtrada in str(pelicula["categoria"]).lower()
-        ]
-
-    if duracion:
-
-        def duracion_en_minutos(d: str) -> int:
-            horas, minutos = d.split("h ")
-            minutos = minutos.replace("m", "")
-            return int(horas) * 60 + int(minutos)
-
-        if duracion == "corta":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) < 100
-            ]
-        elif duracion == "media":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if 100 <= duracion_en_minutos(pelicula["duracion"]) <= 150
-            ]
-        elif duracion == "larga":
-            resultados = [
-                pelicula
-                for pelicula in resultados
-                if duracion_en_minutos(pelicula["duracion"]) > 150
-            ]
-
-    return resultados
-
-
-# Precios fijos por tipo de entrada
-PRECIOS = {"comun": 15000, "menor_jubilado": 10000, "movistar": 15000}
-
-
-# Seleccion de funciones (fechas, idiomas, horarios)
+# Mostrar valores de funciones
 def obtener_funciones(funciones, fecha=None, idioma=None):
-    fechas = [f["fecha"] for f in funciones]
-    fechas = list(dict.fromkeys(fechas))
+    fechas = {f["fecha"] for f in funciones}
 
     if fecha:
-        idiomas_disponibles = [
-            f["idioma"] for f in funciones if f["fecha"] == fecha
-        ]
-        idiomas_disponibles = list(dict.fromkeys(idiomas_disponibles))
+        filtradas_fecha = filter(lambda f: f["fecha"] == fecha, funciones)
+        idiomas = {f["idioma"] for f in filtradas_fecha}
     else:
-        idiomas_disponibles = []
+        idiomas = {f["idioma"] for f in funciones}
 
     if fecha and idioma:
-        horarios = [
-            f["hora"]
-            for f in funciones
-            if f["fecha"] == fecha and f["idioma"] == idioma
-        ]
-        horarios = list(dict.fromkeys(horarios))
+        filtradas = filter(
+            lambda f: f["fecha"] == fecha and f["idioma"] == idioma,
+            funciones
+        )
+        horarios = {f["hora"] for f in filtradas}
     else:
-        horarios = []
+        horarios = set()
 
-    return list(fechas), list(idiomas_disponibles), list(horarios)
+    return list(fechas), list(idiomas), list(horarios)
 
 #Calcular total de orden
 def calcular_total(comun, menor, jubilado):
@@ -241,19 +179,37 @@ def mostrar_asientos(funcion_id):
     matriz = f["asientos"]
     return matriz
 
+def modificar_asientos(orden_id):
+    ordenes = cargar_json("ordenes.json")
+    funciones = cargar_json("funciones.json")
+    orden = ordenes[str(orden_id)]
+    funcion_id = orden["funcion_id"]
+    asientos_orden = orden["asientos"]
+    matriz = funciones[str(funcion_id)]["asientos"]
+
+    for asiento in asientos_orden:
+        fila, columna = asiento.strip().split("-")
+        matriz[int(fila)-1][int(columna)-1] = 1
+
+    funciones[str(funcion_id)]["asientos"] = matriz
+    guardar_json(funciones, "funciones.json")
+
 def cant_entradas(comun, menor, jubilado):
     return int(comun or 0) + int(menor or 0) + int(jubilado or 0)
 
 # Orden de compra
 def crear_orden(reserva, asientos):
     ordenes = cargar_json("ordenes.json")
-    ordenes[len(ordenes)+1] = {
+    orden_id = len(ordenes) + 1
+    ordenes[orden_id] = {
         "funcion_id": reserva["funcion_id"],
         "entradas": reserva["entradas"],
         "asientos": asientos,
         "total": reserva["total"],
     }
     guardar_json(ordenes, "ordenes.json")
+    modificar_asientos(orden_id)
+    return orden_id
 
 def mostrar_orden(orden_id):
     ordenes = cargar_json("ordenes.json")
