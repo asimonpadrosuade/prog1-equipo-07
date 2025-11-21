@@ -5,7 +5,7 @@ from pathlib import Path
 def cargar_json(nombre):
     ruta = Path("app/data") / nombre
 
-    try:
+    try: #A1
         with ruta.open("r", encoding="utf-8") as f:
             return json.load(f)
 

@@ -12,19 +12,25 @@ def buscar_peliculas(busqueda=None, categoria=None, duracion=None):
     peliculas = cargar_json("peliculas.json")
     funciones = cargar_json("funciones.json")
     con_funcion = {int(f["pelicula_id"]) for f in funciones.values()}
-    resultados = [p for p in peliculas if int(p["id"]) in con_funcion]
+    resultados = [p for p in peliculas if int(p["id"]) in con_funcion] #A1
 
     if busqueda:
         b = limpiar_texto(busqueda)
-        resultados = list(filter(lambda p: b in limpiar_texto(p["titulo"]), resultados))
+        resultados = list(filter(lambda p: b in limpiar_texto(p["titulo"]), resultados)) #A8
 
 
     if categoria:
         cat = limpiar_texto(categoria)
+
+        def _cats(v):
+            if isinstance(v, list):
+                return v
+            return [v] if v is not None else []
+
         resultados = [
             p for p in resultados
-            if any(cat in limpiar_texto(str(c)) for c in p["categoria"])
-     ]
+            if any(cat in limpiar_texto(str(c)) for c in _cats(p.get("categoria")))
+        ]
 
 
     if duracion:
@@ -57,7 +63,7 @@ def agregar_funcion(pelicula_id, sala, fecha, hora, idioma):
         "fecha": fecha,
         "hora": hora,
         "idioma": idioma,
-        "asientos": [[0] * columnas for _ in range(filas)],
+        "asientos": [[0] * columnas for _ in range(filas)], #A4
     }
     guardar_json(funciones, "funciones.json")
 
@@ -121,7 +127,7 @@ def encontrar_funciones_filtros(pelicula_id, fecha=None, idioma=None, hora=None)
     funciones = mostrar_funciones(pelicula_id)
 
     if fecha:
-        funciones = [f for f in funciones if f["fecha"] == fecha]
+        funciones = [f for f in funciones if f["fecha"] == fecha] #A6
     if idioma:
         funciones = [f for f in funciones if f["idioma"] == idioma]
     if hora:
@@ -143,7 +149,7 @@ def encontrar_peliculas(lista, pid):
 
 # Mostrar valores de funciones
 def obtener_funciones(funciones, fecha=None, idioma=None):
-    fechas = {f["fecha"] for f in funciones}
+    fechas = {f["fecha"] for f in funciones} #A7
 
     if fecha:
         filtradas_fecha = filter(lambda f: f["fecha"] == fecha, funciones)
@@ -160,7 +166,7 @@ def obtener_funciones(funciones, fecha=None, idioma=None):
     else:
         horarios = set()
 
-    return list(fechas), list(idiomas), list(horarios)
+    return list(fechas), list(idiomas), list(horarios) #A3
 
 #Calcular total de orden
 def calcular_total(comun, menor, jubilado):
@@ -188,8 +194,8 @@ def modificar_asientos(orden_id):
     matriz = funciones[str(funcion_id)]["asientos"]
 
     for asiento in asientos_orden:
-        fila, columna = asiento.strip().split("-")
-        matriz[int(fila)-1][int(columna)-1] = 1
+        fila, columna = asiento.strip().split("-") #A2
+        matriz[int(fila)-1][int(columna)-1] = 1 #A5
 
     funciones[str(funcion_id)]["asientos"] = matriz
     guardar_json(funciones, "funciones.json")

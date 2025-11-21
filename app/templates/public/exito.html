@@ -32,23 +32,39 @@
       <div class="main-container row g-5 px-sm-5 px-3 align-items-stretch">
         <div class="col-12">
           <div class="card bg-dark h-100 shadow-sm">
-            <div class="card-body px-4 text-light">
-              <h2 class="mb-3 text-center">¡Compra exitosa!</h2>
-              <p class="text-center">
-                Gracias por tu compra. Tus entradas han sido procesadas
-                correctamente.
-              </p>
-
-              <hr class="border-secondary my-4" />
-
-              <h3 class="h5 mb-3">Resumen de orden</h3>
-              <div class="row g-3">
-                <div class="col-12 col-md-6">
+            <div class="card-body my-4 px-5 text-light">
+              <div class="mb-5">
+                <h2 class="mb-3 text-center">¡Compra exitosa!</h2>
+                <p class="text-center">
+                  Gracias por tu compra. Tus entradas han sido procesadas
+                  correctamente.
+                </p>
+              </div>
+              <div class="row g-5">
+                <div class="col-12 col-md-auto">
+                  <div>
+                    <div>
+                      <img
+                        src="/static/imagenes/posters/p{{ pelicula_id }}.webp"
+                        class="img-fluid mb-3 rounded"
+                        style="max-height: 60dvh"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-auto flex-grow-1">
                   <div
-                    class="p-3 rounded"
-                    style="background: #1f1f1f; border: 1px solid #333;"
+                    class="p-4 rounded"
+                    style="background: #1f1f1f; border: 1px solid #333"
                   >
-                    <div class="mb-2">
+                    <h3 class="h4 mb-3 text-center">Resumen de orden</h3>
+                    <div class="mb-4">
+                      <strong>Película:</strong> {{ pelicula_nombre }}
+                    </div>
+                    <div class="mb-4">
+                      <strong>Fecha:</strong> {{ fecha }} {{ funcion.hora }}
+                    </div>
+                    <div class="mb-4">
                       <strong>Entradas:</strong>
                       <ul class="mb-0 mt-2">
                         <li>Estandar: {{ orden.entradas.comun }}</li>
@@ -56,28 +72,18 @@
                         <li>Jubilado: {{ orden.entradas.jubilado }}</li>
                       </ul>
                     </div>
-                    <div class="mb-2">
-                      <strong>Asientos:</strong>
-                      <div class="mt-2">
+                    <div class="mb-4">
+                      <strong class="me-1">Asientos:</strong>
                         {% for a in orden.asientos %}
-                        <span class="badge text-bg-secondary me-1">{{ a }}</span>
-                        {% else %}
-                        <span class="text-secondary">Sin asientos</span>
+                        <span class="badge text-bg-secondary me-1"
+                          >{{ a }}</span
+                        >
                         {% endfor %}
-                      </div>
                     </div>
-                    <div class="fs-5 mt-3">
+                    <div class="fs-5 mt-5">
                       <strong>Total:</strong> $ {{ '%.2f'|format(orden.total) }}
                     </div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-6 d-flex align-items-stretch">
-                  <div
-                    class="p-3 rounded w-100"
-                    style="background: #1f1f1f; border: 1px solid #333;"
-                  >
-                    <h4 class="h6">Acciones</h4>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
+                    <div class="d-flex flex-wrap mt-4">
                       <button
                         class="btn btn-outline-light"
                         onclick="window.print()"
@@ -85,9 +91,6 @@
                         Imprimir
                       </button>
                     </div>
-                    <p class="text-secondary mt-3 mb-0">
-                      Guarda este resumen como comprobante.
-                    </p>
                   </div>
                 </div>
               </div>

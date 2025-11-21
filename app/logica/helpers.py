@@ -1,3 +1,4 @@
+from datetime import datetime, date
 import unicodedata
 
 def limpiar_texto(s: str) -> str:
@@ -15,10 +16,26 @@ def duracion_en_minutos(d: str | None) -> int:
     
 
 def horario_en_minutos(hora: str | None) -> int:
-    h, m = hora.split(":")
+    h, m = hora.split(":") #A1
     minutos = int(h) * 60 + int(m)
     return minutos
 
 def sacar_hora_horario(hora: str | None) -> int:
     h, m = hora.split(":")
     return int(h)
+
+def dia_relativo(fecha: str) -> str:
+    try:
+        fecha = datetime.fromisoformat(fecha).date()
+    except ValueError:
+        fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
+
+    hoy = date.today()
+    diferencia = (fecha - hoy).days
+
+    if diferencia == 0:
+        return "Hoy"
+    elif diferencia == 1:
+        return "Mañana"
+    else:
+        return fecha.strftime("%d/%m/%Y")

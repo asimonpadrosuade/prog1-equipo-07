@@ -37,5 +37,59 @@
             "4-7"
         ],
         "total": 20000
+    },
+    "4": {
+        "funcion_id": "8",
+        "entradas": {
+            "comun": 2,
+            "menor": 1,
+            "jubilado": 0
+        },
+        "asientos": [
+            "4-6",
+            "4-7",
+            "4-8"
+        ],
+        "total": 40000
+    },
+    "5": {
+        "funcion_id": "8",
+        "entradas": {
+            "comun": 0,
+            "menor": 0,
+            "jubilado": 1
+        },
+        "asientos": [
+            "5-6"
+        ],
+        "total": 10000
+    },
+    "6": {
+        "funcion_id": "11",
+        "entradas": {
+            "comun": 2,
+            "menor": 2,
+            "jubilado": 0
+        },
+        "asientos": [
+            "5-5",
+            "5-6",
+            "5-7",
+            "5-8"
+        ],
+        "total": 50000
+    },
+    "7": {
+        "funcion_id": "9",
+        "entradas": {
+            "comun": 2,
+            "menor": 0,
+            "jubilado": 0
+        },
+        "asientos": [
+            "4-5",
+            "4-6"
+        ],
+        "total": 30000
     }
 }

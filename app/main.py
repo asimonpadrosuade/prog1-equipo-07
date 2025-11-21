@@ -18,6 +18,7 @@ from app.logica.utils import (
     encontrar_funciones,
     mostrar_orden,
 )
+from app.logica.helpers import dia_relativo
 from app.logica.json_access import cargar_json
 
 app = FastAPI()
@@ -133,7 +134,7 @@ def recibir_entradas(
 # Seleccion de asientos
 @app.get("/asientos/{reserva_id}", response_class=HTMLResponse)
 def asientos(request: Request, reserva_id: str, error: str | None = Query(None)):
-    try:
+    try: #A2
         reserva = reserva_temp[reserva_id]
     except KeyError:
         return RedirectResponse("/", status_code=303)
@@ -153,7 +154,7 @@ def asientos(request: Request, reserva_id: str, error: str | None = Query(None))
 @app.post("/asientos")
 def recibir_asientos(
     reserva_id: str = Form(...),
-    asientos: list[str] = Form([]),
+    asientos: list[str] = Form([]), #A1
 ):
     try:
         reserva = reserva_temp[reserva_id]
@@ -188,6 +189,7 @@ def resumen(request: Request, reserva_id: str):
             "asientos": seleccion,
             "funcion": funcion,
             "pelicula": pelicula,
+            "fecha": dia_relativo(funcion["fecha"]),
         },
     )
 
@@ -208,8 +210,21 @@ def confirmar_orden(
 # Compra exitosa
 @app.get("/exito/{orden_id}", response_class=HTMLResponse)
 def exito(request: Request, orden_id: str):
+    orden = mostrar_orden(orden_id)
+    funcion = encontrar_funciones(orden["funcion_id"])
+    pelicula = encontrar_peliculas(
+        cargar_json("peliculas.json"), funcion["pelicula_id"]
+    )
     return templates.TemplateResponse(
-        "public/exito.html", {"orden": mostrar_orden(orden_id), "request": request}
+        "public/exito.html",
+        {
+            "orden": orden,
+            "pelicula_id": funcion["pelicula_id"],
+            "pelicula_nombre": pelicula["titulo"],
+            "funcion": funcion,
+            "request": request,
+            "fecha": dia_relativo(funcion["fecha"])
+        },
     )
 
 
