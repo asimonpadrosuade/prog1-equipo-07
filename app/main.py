@@ -1,6 +1,6 @@
 import uuid
 import uvicorn
-from fastapi import FastAPI, Request, Query, Form
+from fastapi import FastAPI, Request, Query, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -16,7 +16,9 @@ from app.logica.utils import (
     mostrar_asientos,
     crear_orden,
     encontrar_funciones,
+    mostrar_orden,
 )
+from app.logica.helpers import dia_relativo
 from app.logica.json_access import cargar_json
 
 app = FastAPI()
@@ -56,6 +58,7 @@ def pelicula(
     fecha: str | None = Query(None),
     idioma: str | None = Query(None),
     hora: str | None = Query(None),
+    error: str | None = Query(None),
 ):
     pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
     funciones = mostrar_funciones(pelicula_id)
@@ -74,12 +77,14 @@ def pelicula(
             "idioma_selected": idioma,
             "hora_selected": hora,
             "precios": precios,
+            "error": None,
         },
     )
 
 
 @app.post("/pelicula/{pelicula_id}")
 def recibir_entradas(
+    request: Request,
     pelicula_id: int,
     comun: int = Form(0),
     menor: int = Form(0),
@@ -88,28 +93,48 @@ def recibir_entradas(
     idioma: str = Form(...),
     hora: str = Form(...),
 ):
+    total_entradas = cant_entradas(comun, menor, jubilado)
+    if total_entradas == 0:
+        pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
+        funciones = mostrar_funciones(pelicula_id)
+        precios = cargar_json("precios.json")
+        fechas, idiomas, horarios = obtener_funciones(funciones, fecha, idioma)
+        return templates.TemplateResponse(
+            "public/peliculas.html",
+            {
+                "request": request,
+                "pelicula": pelicula,
+                "funciones": funciones,
+                "fechas": fechas,
+                "idiomas": idiomas,
+                "horarios": horarios,
+                "fecha_selected": fecha,
+                "idioma_selected": idioma,
+                "hora_selected": hora,
+                "precios": precios,
+                "error": "Tenés que seleccionar al menos una entrada.",
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
     reserva_id = str(uuid.uuid4())
     funcion_seleccionada = encontrar_funciones_filtros(pelicula_id, fecha, idioma, hora)
     total = calcular_total(comun, menor, jubilado)
-    total_entradas = cant_entradas(comun, menor, jubilado)
 
     reserva_temp[reserva_id] = {
         "funcion_id": funcion_seleccionada[0]["id"],
-        "entradas": {
-            "comun": comun,
-            "menor": menor,
-            "jubilado": jubilado,
-        },
+        "entradas": {"comun": comun, "menor": menor, "jubilado": jubilado},
         "total": total,
         "cantidad_entradas": total_entradas,
+        "confirmada": False,
     }
     return RedirectResponse(f"/asientos/{reserva_id}", status_code=303)
 
 
 # Seleccion de asientos
 @app.get("/asientos/{reserva_id}", response_class=HTMLResponse)
-def asientos(request: Request, reserva_id: str):
-    try:
+def asientos(request: Request, reserva_id: str, error: str | None = Query(None)):
+    try: #A2
         reserva = reserva_temp[reserva_id]
     except KeyError:
         return RedirectResponse("/", status_code=303)
@@ -129,14 +154,17 @@ def asientos(request: Request, reserva_id: str):
 @app.post("/asientos")
 def recibir_asientos(
     reserva_id: str = Form(...),
-    asientos: list[str] = Form([]),
+    asientos: list[str] = Form([]), #A1
 ):
-    reserva = reserva_temp.get(reserva_id)
-    if not reserva:
+    try:
+        reserva = reserva_temp[reserva_id]
+    except KeyError:
         return RedirectResponse("/", status_code=303)
     max_sel = reserva["cantidad_entradas"]
     if len(asientos) != max_sel:
-        return RedirectResponse(f"/asientos/{reserva_id}?error=cantidad", status_code=303)
+        return RedirectResponse(
+            f"/asientos/{reserva_id}?error=cantidad", status_code=303
+        )
     asientos_temp[reserva_id] = asientos
     return RedirectResponse(f"/resumen/{reserva_id}", status_code=303)
 
@@ -148,11 +176,21 @@ def resumen(request: Request, reserva_id: str):
         reserva = reserva_temp[reserva_id]
         seleccion = asientos_temp[reserva_id]
         funcion = encontrar_funciones(reserva["funcion_id"])
+        pelicula = encontrar_peliculas(
+            cargar_json("peliculas.json"), funcion["pelicula_id"]
+        )
     except KeyError:
         return RedirectResponse("/", status_code=303)
     return templates.TemplateResponse(
         "public/resumen.html",
-        {"request": request, "orden": reserva, "asientos": seleccion, "funcion": funcion},
+        {
+            "request": request,
+            "orden": reserva,
+            "asientos": seleccion,
+            "funcion": funcion,
+            "pelicula": pelicula,
+            "fecha": dia_relativo(funcion["fecha"]),
+        },
     )
 
 
@@ -160,13 +198,34 @@ def resumen(request: Request, reserva_id: str):
 def confirmar_orden(
     reserva_id: str,
 ):
-    reserva = reserva_temp.get(reserva_id)
-    if not reserva:
+    try:
+        reserva = reserva_temp[reserva_id]
+        asientos = asientos_temp[reserva_id]
+    except KeyError:
         return RedirectResponse("/", status_code=303)
+    orden_id = crear_orden(reserva, asientos)
+    return RedirectResponse(f"/exito/{orden_id}", status_code=303)
 
-    asientos = asientos_temp.get(reserva_id)
-    crear_orden(reserva, asientos)
-    return RedirectResponse(f"/resumen/{reserva_id}?confirmada=1", status_code=303)
+
+# Compra exitosa
+@app.get("/exito/{orden_id}", response_class=HTMLResponse)
+def exito(request: Request, orden_id: str):
+    orden = mostrar_orden(orden_id)
+    funcion = encontrar_funciones(orden["funcion_id"])
+    pelicula = encontrar_peliculas(
+        cargar_json("peliculas.json"), funcion["pelicula_id"]
+    )
+    return templates.TemplateResponse(
+        "public/exito.html",
+        {
+            "orden": orden,
+            "pelicula_id": funcion["pelicula_id"],
+            "pelicula_nombre": pelicula["titulo"],
+            "funcion": funcion,
+            "request": request,
+            "fecha": dia_relativo(funcion["fecha"])
+        },
+    )
 
 
 # Panel de admin
