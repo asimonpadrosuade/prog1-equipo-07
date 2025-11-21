@@ -20,13 +20,14 @@
   <body class="mx-lg-5 mx-md-2 mx-sm-0">
     <header>
       <div class="container-fluid px-0">
-        <div class="row align-items-center">
-          <div class="col-6">
-            <h1 class="title mb-0">PyTicket</h1>
+        <div class="d-flex flex-wrap align-items-center gap-3 py-2">
+          <h1 class="title mb-0 me-auto">PyTicket</h1>
+          {% if error %}
+          <div class="alert alert-danger mb-0 flex-grow-1 flex-md-grow-0 px-3 py-2">
+            {{ error }}
           </div>
-          <div class="col-6 text-end">
-            <a href="/" class="btn bg-dark text-light">Volver al inicio</a>
-          </div>
+          {% endif %}
+          <a href="/" class="btn bg-dark text-light">Volver al inicio</a>
         </div>
       </div>
     </header>
@@ -146,6 +147,7 @@
               </p>
               {% endif %}
             </div>
+
           </div>
         </div>
       </div>

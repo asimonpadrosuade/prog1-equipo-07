@@ -1,6 +1,6 @@
 import uuid
 import uvicorn
-from fastapi import FastAPI, Request, Query, Form
+from fastapi import FastAPI, Request, Query, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -56,6 +56,7 @@ def pelicula(
     fecha: str | None = Query(None),
     idioma: str | None = Query(None),
     hora: str | None = Query(None),
+    error: str | None = Query(None),
 ):
     pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
     funciones = mostrar_funciones(pelicula_id)
@@ -74,12 +75,14 @@ def pelicula(
             "idioma_selected": idioma,
             "hora_selected": hora,
             "precios": precios,
+            "error": None,
         },
     )
 
 
 @app.post("/pelicula/{pelicula_id}")
 def recibir_entradas(
+    request: Request,
     pelicula_id: int,
     comun: int = Form(0),
     menor: int = Form(0),
@@ -88,27 +91,47 @@ def recibir_entradas(
     idioma: str = Form(...),
     hora: str = Form(...),
 ):
+    total_entradas = cant_entradas(comun, menor, jubilado)
+    if total_entradas == 0:
+        pelicula = encontrar_peliculas(cargar_json("peliculas.json"), pelicula_id)
+        funciones = mostrar_funciones(pelicula_id)
+        precios = cargar_json("precios.json")
+        fechas, idiomas, horarios = obtener_funciones(funciones, fecha, idioma)
+        return templates.TemplateResponse(
+            "public/peliculas.html",
+            {
+                "request": request,
+                "pelicula": pelicula,
+                "funciones": funciones,
+                "fechas": fechas,
+                "idiomas": idiomas,
+                "horarios": horarios,
+                "fecha_selected": fecha,
+                "idioma_selected": idioma,
+                "hora_selected": hora,
+                "precios": precios,
+                "error": "Tenés que seleccionar al menos una entrada.",
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
     reserva_id = str(uuid.uuid4())
     funcion_seleccionada = encontrar_funciones_filtros(pelicula_id, fecha, idioma, hora)
     total = calcular_total(comun, menor, jubilado)
-    total_entradas = cant_entradas(comun, menor, jubilado)
 
     reserva_temp[reserva_id] = {
         "funcion_id": funcion_seleccionada[0]["id"],
-        "entradas": {
-            "comun": comun,
-            "menor": menor,
-            "jubilado": jubilado,
-        },
+        "entradas": {"comun": comun, "menor": menor, "jubilado": jubilado},
         "total": total,
         "cantidad_entradas": total_entradas,
+        "confirmada": False,
     }
     return RedirectResponse(f"/asientos/{reserva_id}", status_code=303)
 
 
 # Seleccion de asientos
 @app.get("/asientos/{reserva_id}", response_class=HTMLResponse)
-def asientos(request: Request, reserva_id: str):
+def asientos(request: Request, reserva_id: str, error: str | None = Query(None)):
     try:
         reserva = reserva_temp[reserva_id]
     except KeyError:
