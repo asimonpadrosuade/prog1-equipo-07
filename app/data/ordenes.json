@@ -91,5 +91,46 @@
             "4-6"
         ],
         "total": 30000
+    },
+    "8": {
+        "funcion_id": "3",
+        "entradas": {
+            "comun": 2,
+            "menor": 0,
+            "jubilado": 0
+        },
+        "asientos": [
+            "5-5",
+            "5-7"
+        ],
+        "total": 30000
+    },
+    "9": {
+        "funcion_id": "4",
+        "entradas": {
+            "comun": 1,
+            "menor": 2,
+            "jubilado": 0
+        },
+        "asientos": [
+            "5-5",
+            "5-6",
+            "5-7"
+        ],
+        "total": 35000
+    },
+    "10": {
+        "funcion_id": "2",
+        "entradas": {
+            "comun": 2,
+            "menor": 1,
+            "jubilado": 0
+        },
+        "asientos": [
+            "5-5",
+            "5-6",
+            "5-7"
+        ],
+        "total": 40000
     }
 }
